@@ -106,6 +106,8 @@
         if(typeof updateDashboard==='function') updateDashboard();
         if(typeof notify==='function') notify('💾 โหลดข้อมูลยอดขาย '+rawSales.length+' รายการ');
       } else {
+        // Clear localStorage so other tabs don't reload stale data on refresh
+        try{ localStorage.removeItem('inv2_sales'); localStorage.removeItem('inv2_sales_name'); }catch(e){}
         if(typeof setSalesSavedUI==='function') setSalesSavedUI(false);
         if(typeof updateDashboard==='function') updateDashboard();
         if(typeof initFilter==='function') initFilter();
