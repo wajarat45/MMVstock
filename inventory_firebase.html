@@ -77,6 +77,10 @@
         const arr = Object.values(val).sort((a,b)=>(b.epoch||0)-(a.epoch||0)).slice(0,500);
         window.stockLog = arr;
         stockLog = arr;
+      } else {
+        // ถูกลบจาก Firebase → clear local array ด้วย
+        window.stockLog = [];
+        stockLog = [];
       }
       safeRun(()=>{ if(typeof renderLog==='function') renderLog(); if(typeof renderReportMovement==='function') renderReportMovement(); });
     });
@@ -1865,7 +1869,9 @@ function exportExcel(){
 
 function clearAllData(){
   if(!confirm('ล้างข้อมูลสต็อกและประวัติทั้งหมด?\n(ไม่สามารถกู้คืนได้)')) return;
-  stockItems={};stockLog=[];saveToStorage();updateMetrics();renderReportMovement();notify('🗑️ ล้างข้อมูลทั้งหมดแล้ว');
+  stockItems={};stockLog=[];
+  try{ _db.ref('stockItems').remove(); _db.ref('stockLog').remove(); }catch(e){}
+  saveToStorage();updateMetrics();renderReportMovement();notify('🗑️ ล้างข้อมูลทั้งหมดแล้ว');
 }
 
 function clearSalesData(){
