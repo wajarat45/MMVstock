@@ -87,8 +87,10 @@
     });
 
     _db.ref('rawSales').on('value', snap=>{
-      const val = snap.exists() ? (snap.val()||[]) : [];
-      if(JSON.stringify(val)===JSON.stringify(window.rawSales)) return;
+      const exists = snap.exists();
+      const val = exists ? (snap.val()||[]) : [];
+      // ถ้าทั้งคู่ว่างเหมือนกัน แต่ Firebase เพิ่งลบ node ให้ผ่านได้
+      if(exists && JSON.stringify(val)===JSON.stringify(window.rawSales)) return;
       window.rawSales=val;
       rawSales=val;
       if(rawSales.length){
@@ -99,7 +101,6 @@
         if(typeof updateDashboard==='function') updateDashboard();
         if(typeof notify==='function') notify('💾 โหลดข้อมูลยอดขาย '+rawSales.length+' รายการ');
       } else {
-        // ข้อมูลถูกเคลียร์ — reset UI ในแท็บอื่นด้วย
         if(typeof setSalesSavedUI==='function') setSalesSavedUI(false);
         if(typeof updateDashboard==='function') updateDashboard();
         if(typeof renderRank==='function') renderRank();
