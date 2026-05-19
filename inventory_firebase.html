@@ -89,7 +89,9 @@
     _db.ref('rawSales').on('value', snap=>{
       const exists = snap.exists();
       const val = exists ? (snap.val()||[]) : [];
-      if(exists && JSON.stringify(val)===JSON.stringify(window.rawSales)) return;
+      // Guard: skip only when data truly hasn't changed (non-empty → same data)
+      // When exists=false (deleted), always proceed so UI resets on all tabs
+      if(exists && val.length > 0 && JSON.stringify(val)===JSON.stringify(window.rawSales)) return;
       window.rawSales=val;
       rawSales=val;
       if(rawSales.length){
@@ -1860,8 +1862,9 @@ function clearAllData(){
 
 function clearSalesData(){
   if(!confirm('ล้างข้อมูลยอดขายทั้งหมด?\n(ไม่สามารถกู้คืนได้)')) return;
-  rawSales=[];
+  // Reset local state first so listener guard won't skip when Firebase fires back
   window.rawSales=[];
+  rawSales=[];
   if(typeof window._fbSaveSales === 'function') window._fbSaveSales([]);
   localStorage.removeItem(LS_SALES);
   localStorage.removeItem(LS_SALES_NAME);
