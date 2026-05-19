@@ -1325,6 +1325,7 @@ document.getElementById('stkCsv').addEventListener('change',e=>{
   const f=e.target.files[0];if(!f)return;
   Papa.parse(f,{header:true,skipEmptyLines:true,complete:r=>{
     let added=0;
+    const logEntries=[];
     r.data.forEach(row=>{
       const keys=Object.keys(row);
       const nameKey=keys.find(k=>k.toLowerCase().includes('product')||k.toLowerCase().includes('item')||k.toLowerCase()==='name'||k.includes('สินค้า')||k.includes('ชื่อ'))||keys[0];
@@ -1339,10 +1340,19 @@ document.getElementById('stkCsv').addEventListener('change',e=>{
       const unit=unitKey?row[unitKey].toString().trim():'ชิ้น';
       const loc=locKey?row[locKey].toString().trim():'';
       stockItems[name]={qty,unit,minQty:min,maxQty:qty,soldQty:0,location:loc};
-      addLog(name,'import',qty,'นำเข้าจาก CSV',loc);
+      // เก็บ log ไว้ push ทีหลัง ไม่ให้ Firebase ยิงกลับมาทับระหว่าง loop
+      logEntries.push({name,type:'import',qty,note:'นำเข้าจาก CSV',location:loc,ts:nowFull(),epoch:Date.now()});
       added++;
     });
+    // บันทึก stockItems ทั้งหมดไป Firebase ครั้งเดียว
     saveToStorage();
+    // push log ทีละรายการหลัง save เสร็จ
+    logEntries.forEach(entry=>{
+      stockLog.unshift(entry);
+      if(typeof window._fbPushLog==='function') window._fbPushLog(entry);
+    });
+    if(stockLog.length>500) stockLog.length=500;
+    try{ localStorage.setItem('stockLog', JSON.stringify(stockLog.slice(0,500))); }catch(e){}
     updateMetrics();
     notify(`📥 Import ${added} รายการสำเร็จ`);
   }});
