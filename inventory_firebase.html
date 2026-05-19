@@ -80,16 +80,19 @@
       if(val){ window.locations=val; locations=val; safeRun(()=>{ if(typeof updateLocationSelects==='function') updateLocationSelects(); if(typeof renderLocationGrid==='function') renderLocationGrid(); }); }
     });
 
-    _db.ref('rawSales').once('value', snap=>{
+    _db.ref('rawSales').on('value', snap=>{
       if(snap.exists()){
-        window.rawSales=snap.val()||[];
-        if(window.rawSales.length){
+        const val=snap.val()||[];
+        if(JSON.stringify(val)===JSON.stringify(window.rawSales)) return;
+        window.rawSales=val;
+        rawSales=val;
+        if(rawSales.length){
           if(typeof initFilter==='function') initFilter();
           if(typeof update==='function') update();
           if(typeof renderRank==='function') renderRank();
           if(typeof setSalesSavedUI==='function') setSalesSavedUI(true);
           if(typeof updateDashboard==='function') updateDashboard();
-          if(typeof notify==='function') notify('💾 โหลดข้อมูลยอดขาย '+window.rawSales.length+' รายการ');
+          if(typeof notify==='function') notify('💾 โหลดข้อมูลยอดขาย '+rawSales.length+' รายการ');
         }
       }
     });
@@ -1303,6 +1306,7 @@ function saveEdit(){
   if(diff!==0) addLog(editTarget,'adj',Math.abs(diff),`ปรับสต็อก ${item.qty}→${newQty}`);
   item.qty=newQty;item.minQty=newMin;item.unit=newUnit;item.location=newLoc;
   item.maxQty=Math.max(item.maxQty,newQty);
+  saveToStorage();
   closeModal();updateMetrics();
   notify(`✏️ อัปเดต ${editTarget}`);
 }
@@ -1310,6 +1314,7 @@ function deleteProduct(name){
   if(!confirm(`ลบสินค้า "${name}" ออกจากระบบ?`)) return;
   delete stockItems[name];
   addLog(name,'adj',0,'ลบออกจากระบบ');
+  saveToStorage();
   updateMetrics();
   notify(`🗑️ ลบ ${name}`);
 }
@@ -1828,6 +1833,8 @@ function clearAllData(){
 function clearSalesData(){
   if(!confirm('ล้างข้อมูลยอดขายทั้งหมด?\n(ไม่สามารถกู้คืนได้)')) return;
   rawSales=[];
+  window.rawSales=[];
+  if(typeof window._fbSaveSales === 'function') window._fbSaveSales([]);
   localStorage.removeItem(LS_SALES);
   localStorage.removeItem(LS_SALES_NAME);
   // Reset file inputs
