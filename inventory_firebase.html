@@ -109,7 +109,7 @@
         if(typeof setSalesSavedUI==='function') setSalesSavedUI(false);
         if(typeof updateDashboard==='function') updateDashboard();
         if(typeof initFilter==='function') initFilter();
-        [window.tChart,window.rChart,window.pChart,window.rankChart].forEach(c=>{if(c) c.destroy();});
+        [window.tChart,window.rChart,window.pChart,window.rankChart].forEach(c=>{try{if(c && typeof c.destroy==='function') c.destroy();}catch(e){}});
         window.tChart=null;window.rChart=null;window.pChart=null;window.rankChart=null;
         tChart=null;rChart=null;pChart=null;rankChart=null;
         ['emptyTrend','emptyBar','emptyPie','emptyRank'].forEach(id=>{const el=document.getElementById(id);if(el)el.style.display='';});
@@ -1894,7 +1894,7 @@ function clearSalesData(){
   const mTopName=document.getElementById('mTopName'); if(mTopName) mTopName.textContent='—';
   ['bRange','bTop','bAvg','bLow'].forEach(id=>{ const el=document.getElementById(id); if(el) el.textContent=id==='bRange'?'ALL DATA':'—'; });
   // Destroy charts
-  [tChart,rChart,pChart,rankChart].forEach(c=>{ if(c) c.destroy(); });
+  [tChart,rChart,pChart,rankChart].forEach(c=>{ try{if(c && typeof c.destroy==='function') c.destroy();}catch(e){} });
   tChart=null;rChart=null;pChart=null;rankChart=null;
   ['emptyTrend','emptyBar','emptyPie','emptyRank'].forEach(id=>{ const el=document.getElementById(id); if(el) el.style.display=''; });
   const rankTbody=document.getElementById('rankTbody');
