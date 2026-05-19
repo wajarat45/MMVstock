@@ -67,10 +67,7 @@
       setFbStatus(true,'Firebase: เชื่อมต่อแล้ว');
       const val=snap.val()||{};
       window.stockItems=val; stockItems=val;
-      safeRun(()=>{
-        if(typeof updateMetrics==='function') updateMetrics();
-        if(!snap.exists() && typeof hardResetStockUI==='function') hardResetStockUI();
-      });
+      safeRun(()=>{ if(typeof updateMetrics==='function') updateMetrics(); });
     }, err=>{ setFbStatus(false,'Firebase: ไม่สามารถเชื่อมต่อ'); console.error(err); });
 
     _db.ref('stockLog').on('value', snap=>{
@@ -84,7 +81,6 @@
         // ถูกลบจาก Firebase → clear local array ด้วย
         window.stockLog = [];
         stockLog = [];
-        if(typeof hardResetStockUI==='function') hardResetStockUI();
       }
       safeRun(()=>{ if(typeof renderLog==='function') renderLog(); if(typeof renderReportMovement==='function') renderReportMovement(); });
     });
@@ -110,9 +106,6 @@
         if(typeof updateDashboard==='function') updateDashboard();
         if(typeof notify==='function') notify('💾 โหลดข้อมูลยอดขาย '+rawSales.length+' รายการ');
       } else {
-        window.rawSales = [];
-        rawSales = [];
-        if(typeof hardResetSalesUI === 'function') hardResetSalesUI();
         // Clear localStorage so other tabs don't reload stale data on refresh
         try{ localStorage.removeItem('inv2_sales'); localStorage.removeItem('inv2_sales_name'); }catch(e){}
         if(typeof setSalesSavedUI==='function') setSalesSavedUI(false);
@@ -943,11 +936,6 @@ body.dark .topbar .btn-primary{
   border:1px solid rgba(255,211,143,.24) !important;
 }
 </style>
-
-
-<script id="clear-guard-js">
-window.__MMV_CLEARING__ = false;
-</script>
 
 </head>
 <body>
@@ -2463,182 +2451,68 @@ function destroyStockChartsAndEmpty(){
   if(alertBody) alertBody.innerHTML='<tr class="empty-row"><td colspan="5">ไม่มีสินค้าใกล้หมด</td></tr>';
 }
 
-
-function hardResetSalesUI(){
-  [tChart,rChart,pChart,rankChart].forEach(c=>{
-    try{ if(c && typeof c.destroy==='function') c.destroy(); }catch(e){}
-  });
-  tChart=null; rChart=null; pChart=null; rankChart=null;
-  window.tChart=null; window.rChart=null; window.pChart=null; window.rankChart=null;
-
-  ['trendChart','repChart','pieChart','rankChart'].forEach(id=>{
-    const canvas=document.getElementById(id);
-    if(canvas){
-      try{
-        const ctx=canvas.getContext('2d');
-        ctx.clearRect(0,0,canvas.width,canvas.height);
-      }catch(e){}
-      canvas.style.display='none';
-    }
-  });
-
-  ['emptyTrend','emptyBar','emptyPie','emptyRank'].forEach(id=>{
-    const el=document.getElementById(id);
-    if(el) el.style.display='flex';
-  });
-
-  const rankTbody=document.getElementById('rankTbody');
-  if(rankTbody) rankTbody.innerHTML='<tr class="empty-row"><td colspan="7">ยังไม่มีข้อมูล</td></tr>';
-
-  ['mTotal','mOrders','mAvg','mReps','mTopVal'].forEach(id=>{
-    const el=document.getElementById(id);
-    if(el) el.textContent='—';
-  });
-  const mTopName=document.getElementById('mTopName');
-  if(mTopName) mTopName.textContent='—';
-
-  ['bRange','bTop','bAvg','bLow'].forEach(id=>{
-    const el=document.getElementById(id);
-    if(el) el.textContent = id==='bRange' ? 'ALL DATA' : '—';
-  });
-
-  const ptHeat=document.getElementById('ptHeatmapWrap');
-  if(ptHeat) ptHeat.style.display='none';
-  const ptEmpty=document.getElementById('ptEmpty');
-  if(ptEmpty) ptEmpty.style.display='flex';
-
-  const repFilter=document.getElementById('repFilter');
-  if(repFilter){
-    repFilter.innerHTML='<option value="all">All sales people</option>';
-    repFilter.disabled=true;
-  }
-
-  const fn=document.getElementById('fnLabel');
-  if(fn) fn.textContent='Upload CSV ยอดขาย';
-  const fn2=document.getElementById('fnLabelRank');
-  if(fn2) fn2.textContent='Upload CSV ยอดขาย';
-
-  const heroSales=document.getElementById('d-hero-sales');
-  if(heroSales) heroSales.textContent='—';
-  const heroOrders=document.getElementById('d-hero-orders');
-  if(heroOrders) heroOrders.textContent='—';
-  const heroAvg=document.getElementById('d-hero-avg');
-  if(heroAvg) heroAvg.textContent='—';
-}
-
-function hardResetStockUI(){
-  [movChart,locPieChart,topStockChart].forEach(c=>{
-    try{ if(c && typeof c.destroy==='function') c.destroy(); }catch(e){}
-  });
-  movChart=null; locPieChart=null; topStockChart=null;
-  window.movChart=null; window.locPieChart=null; window.topStockChart=null;
-
-  ['movementChart','topStockChart','locPieChart'].forEach(id=>{
-    const canvas=document.getElementById(id);
-    if(canvas){
-      try{
-        const ctx=canvas.getContext('2d');
-        ctx.clearRect(0,0,canvas.width,canvas.height);
-      }catch(e){}
-      canvas.style.display='none';
-    }
-  });
-
-  ['emptyMovement','emptyTopStock','emptyLocPie'].forEach(id=>{
-    const el=document.getElementById(id);
-    if(el) el.style.display='flex';
-  });
-
-  const alertBody=document.getElementById('alertTableBody');
-  if(alertBody) alertBody.innerHTML='<tr class="empty-row"><td colspan="5">ไม่มีสินค้าใกล้หมด</td></tr>';
-
-  const stkTbody=document.getElementById('stkTbody');
-  if(stkTbody) stkTbody.innerHTML='<tr class="empty-row"><td colspan="9">ยังไม่มีสินค้า · เพิ่มสินค้าหรือนำเข้า CSV</td></tr>';
-
-  const mvBody=document.getElementById('mvBody');
-  if(mvBody) mvBody.innerHTML='<tr class="empty-row"><td colspan="6">ยังไม่มีประวัติ</td></tr>';
-
-  const rptStockBody=document.getElementById('rptStockBody');
-  if(rptStockBody) rptStockBody.innerHTML='<tr class="empty-row"><td colspan="8">ยังไม่มีข้อมูล</td></tr>';
-}
-
-async function clearAllData(){
+function clearAllData(){
   if(!confirm('ล้างข้อมูลสต็อกและประวัติทั้งหมด?
 (ไม่สามารถกู้คืนได้)')) return;
 
-  stockItems = {};
-  stockLog = [];
-  window.stockItems = {};
-  window.stockLog = [];
-
-  try{
-    localStorage.setItem('MMV_CLEAR_STOCK_PING', Date.now().toString());
-    localStorage.removeItem(LS_STOCK);
-    localStorage.removeItem(LS_LOG);
-    localStorage.removeItem('stockItems');
-    localStorage.removeItem('stockLog');
-  }catch(e){}
+  stockItems={};
+  stockLog=[];
+  window.stockItems={};
+  window.stockLog=[];
 
   try{
     if(typeof _db !== 'undefined'){
-      await _db.ref('stockItems').remove();
-      await _db.ref('stockLog').remove();
+      _db.ref('stockItems').remove();
+      _db.ref('stockLog').remove();
     }
-  }catch(e){
-    console.error('Clear stock Firebase error:', e);
-  }
+  }catch(e){}
 
-  hardResetStockUI();
+  try{
+    localStorage.removeItem(LS_STOCK);
+    localStorage.removeItem(LS_LOG);
+  }catch(e){}
+
+  destroyStockChartsAndEmpty();
   updateMetrics();
   renderTable();
   renderReportMovement();
   renderReportStock();
   updateDashboard();
 
-  setTimeout(()=>{
-    hardResetStockUI();
-    updateDashboard();
-  }, 500);
-
   notify('🗑️ ล้างข้อมูลสต็อกทั้งหมดแล้ว');
 }
 
-async function clearSalesData(){
+function clearSalesData(){
   if(!confirm('ล้างข้อมูลยอดขายทั้งหมด?
 (ไม่สามารถกู้คืนได้)')) return;
 
-  window.rawSales = [];
-  rawSales = [];
+  window.rawSales=[];
+  rawSales=[];
 
   try{
-    localStorage.setItem('MMV_CLEAR_SALES_PING', Date.now().toString());
-    localStorage.removeItem(LS_SALES);
-    localStorage.removeItem(LS_SALES_NAME);
-    localStorage.removeItem('salesData');
-    localStorage.removeItem('rawSales');
+    if(typeof _db !== 'undefined') _db.ref('rawSales').remove();
+    else if(typeof window._fbSaveSales === 'function') window._fbSaveSales([]);
   }catch(e){}
 
   try{
-    if(typeof _db !== 'undefined'){
-      await _db.ref('rawSales').remove();
-    }else if(typeof window._fbSaveSales === 'function'){
-      window._fbSaveSales([]);
-    }
-  }catch(e){
-    console.error('Clear sales Firebase error:', e);
-  }
+    localStorage.removeItem(LS_SALES);
+    localStorage.removeItem(LS_SALES_NAME);
+  }catch(e){}
 
   const fi=document.getElementById('fi'); if(fi) fi.value='';
   const fi2=document.getElementById('fi2'); if(fi2) fi2.value='';
+  const fn=document.getElementById('fnLabel'); if(fn) fn.textContent='Upload CSV ยอดขาย';
+  const fn2=document.getElementById('fnLabelRank'); if(fn2) fn2.textContent='Upload CSV ยอดขาย';
 
-  hardResetSalesUI();
+  const rep=document.getElementById('repFilter');
+  if(rep){
+    rep.innerHTML='<option value="all">All sales people</option>';
+    rep.disabled=true;
+  }
+
+  destroySalesChartsAndEmpty();
   setSalesSavedUI(false);
   updateDashboard();
-
-  setTimeout(()=>{
-    hardResetSalesUI();
-    updateDashboard();
-  }, 500);
 
   notify('🗑️ ล้างข้อมูลยอดขายแล้ว');
 }
@@ -2916,23 +2790,6 @@ setTimeout(()=>{
 loadingBlocks.forEach(el=>el.style.display='none');
 },1200);
 
-});
-</script>
-
-
-<script id="cross-tab-clear-fallback">
-window.addEventListener('storage', function(e){
-  if(e.key === 'MMV_CLEAR_SALES_PING'){
-    window.rawSales=[]; rawSales=[];
-    if(typeof hardResetSalesUI==='function') hardResetSalesUI();
-    if(typeof updateDashboard==='function') updateDashboard();
-  }
-  if(e.key === 'MMV_CLEAR_STOCK_PING'){
-    window.stockItems={}; stockItems={};
-    window.stockLog=[]; stockLog=[];
-    if(typeof hardResetStockUI==='function') hardResetStockUI();
-    if(typeof updateDashboard==='function') updateDashboard();
-  }
 });
 </script>
 
