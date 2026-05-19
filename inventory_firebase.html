@@ -34,8 +34,10 @@
 
   window._fbSaveStock = function(si, loc){
     try{
-      _db.ref('stockItems').set(si||{});
-      _db.ref('locations').set(loc||{});
+      if(!si||!Object.keys(si).length) _db.ref('stockItems').remove();
+      else _db.ref('stockItems').set(si);
+      if(!loc||!Object.keys(loc).length) _db.ref('locations').remove();
+      else _db.ref('locations').set(loc);
     }catch(e){ console.error('Firebase save error:',e); }
   };
 
@@ -44,7 +46,10 @@
   };
 
   window._fbSaveSales = function(rs){
-    try{ _db.ref('rawSales').set(rs||[]); }catch(e){}
+    try{
+      if(!rs||!rs.length) _db.ref('rawSales').remove();
+      else _db.ref('rawSales').set(rs);
+    }catch(e){}
   };
 
   function isUserTyping(){
