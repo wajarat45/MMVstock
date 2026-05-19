@@ -60,8 +60,9 @@
   window.addEventListener('load', function(){
     _db.ref('stockItems').on('value', snap=>{
       setFbStatus(true,'Firebase: เชื่อมต่อแล้ว');
-      const val=snap.val();
-      if(val){ window.stockItems=val; stockItems=val; safeRun(()=>{ if(typeof updateMetrics==='function') updateMetrics(); }); }
+      const val=snap.val()||{};
+      window.stockItems=val; stockItems=val;
+      safeRun(()=>{ if(typeof updateMetrics==='function') updateMetrics(); });
     }, err=>{ setFbStatus(false,'Firebase: ไม่สามารถเชื่อมต่อ'); console.error(err); });
 
     _db.ref('stockLog').on('value', snap=>{
@@ -81,19 +82,23 @@
     });
 
     _db.ref('rawSales').on('value', snap=>{
-      if(snap.exists()){
-        const val=snap.val()||[];
-        if(JSON.stringify(val)===JSON.stringify(window.rawSales)) return;
-        window.rawSales=val;
-        rawSales=val;
-        if(rawSales.length){
-          if(typeof initFilter==='function') initFilter();
-          if(typeof update==='function') update();
-          if(typeof renderRank==='function') renderRank();
-          if(typeof setSalesSavedUI==='function') setSalesSavedUI(true);
-          if(typeof updateDashboard==='function') updateDashboard();
-          if(typeof notify==='function') notify('💾 โหลดข้อมูลยอดขาย '+rawSales.length+' รายการ');
-        }
+      const val = snap.exists() ? (snap.val()||[]) : [];
+      if(JSON.stringify(val)===JSON.stringify(window.rawSales)) return;
+      window.rawSales=val;
+      rawSales=val;
+      if(rawSales.length){
+        if(typeof initFilter==='function') initFilter();
+        if(typeof update==='function') update();
+        if(typeof renderRank==='function') renderRank();
+        if(typeof setSalesSavedUI==='function') setSalesSavedUI(true);
+        if(typeof updateDashboard==='function') updateDashboard();
+        if(typeof notify==='function') notify('💾 โหลดข้อมูลยอดขาย '+rawSales.length+' รายการ');
+      } else {
+        // ข้อมูลถูกเคลียร์ — reset UI ในแท็บอื่นด้วย
+        if(typeof setSalesSavedUI==='function') setSalesSavedUI(false);
+        if(typeof updateDashboard==='function') updateDashboard();
+        if(typeof renderRank==='function') renderRank();
+        if(typeof initFilter==='function') initFilter();
       }
     });
   });
