@@ -89,7 +89,6 @@
     _db.ref('rawSales').on('value', snap=>{
       const exists = snap.exists();
       const val = exists ? (snap.val()||[]) : [];
-      // ถ้าทั้งคู่ว่างเหมือนกัน แต่ Firebase เพิ่งลบ node ให้ผ่านได้
       if(exists && JSON.stringify(val)===JSON.stringify(window.rawSales)) return;
       window.rawSales=val;
       rawSales=val;
@@ -103,8 +102,16 @@
       } else {
         if(typeof setSalesSavedUI==='function') setSalesSavedUI(false);
         if(typeof updateDashboard==='function') updateDashboard();
-        if(typeof renderRank==='function') renderRank();
         if(typeof initFilter==='function') initFilter();
+        [window.tChart,window.rChart,window.pChart,window.rankChart].forEach(c=>{if(c) c.destroy();});
+        window.tChart=null;window.rChart=null;window.pChart=null;window.rankChart=null;
+        ['emptyTrend','emptyBar','emptyPie','emptyRank'].forEach(id=>{const el=document.getElementById(id);if(el)el.style.display='';});
+        const rankTbody=document.getElementById('rankTbody');
+        if(rankTbody) rankTbody.innerHTML='<tr class="empty-row"><td colspan="7">ยังไม่มีข้อมูล</td></tr>';
+        ['mTotal','mOrders','mAvg','mReps','mTopVal'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent='—';});
+        const mTopName=document.getElementById('mTopName');if(mTopName)mTopName.textContent='—';
+        const fnLabel=document.getElementById('fnLabel');if(fnLabel)fnLabel.textContent='Upload CSV ยอดขาย';
+        const fnLabelRank=document.getElementById('fnLabelRank');if(fnLabelRank)fnLabelRank.textContent='Upload CSV ยอดขาย';
       }
     });
   });
