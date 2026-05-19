@@ -32,34 +32,52 @@
     if(lbl) lbl.textContent = msg;
   }
 
-  window._fbSaveStock = function(si, sl, loc){
+  window._fbSaveStock = function(si, loc){
     try{
       _db.ref('stockItems').set(si||{});
-      _db.ref('stockLog').set((sl||[]).slice(0,500));
       _db.ref('locations').set(loc||{});
     }catch(e){ console.error('Firebase save error:',e); }
+  };
+
+  window._fbPushLog = function(entry){
+    try{ _db.ref('stockLog').push(entry); }catch(e){}
   };
 
   window._fbSaveSales = function(rs){
     try{ _db.ref('rawSales').set(rs||[]); }catch(e){}
   };
 
+  function isUserTyping(){
+    const el=document.activeElement;
+    if(!el) return false;
+    const tag=el.tagName.toLowerCase();
+    return tag==='input'||tag==='textarea'||tag==='select';
+  }
+
+  function safeRun(fn){ if(!isUserTyping()) fn(); else setTimeout(fn,1500); }
+
   // ── Realtime listeners (ตั้งหลัง DOM โหลด) ──
   window.addEventListener('load', function(){
     _db.ref('stockItems').on('value', snap=>{
       setFbStatus(true,'Firebase: เชื่อมต่อแล้ว');
       const val=snap.val();
-      if(val){ window.stockItems=val; if(typeof updateMetrics==='function') updateMetrics(); }
+      if(val){ window.stockItems=val; safeRun(()=>{ if(typeof updateMetrics==='function') updateMetrics(); }); }
     }, err=>{ setFbStatus(false,'Firebase: ไม่สามารถเชื่อมต่อ'); console.error(err); });
 
     _db.ref('stockLog').on('value', snap=>{
       const val=snap.val();
-      if(val){ window.stockLog=val; if(typeof renderLog==='function') renderLog(); if(typeof renderReportMovement==='function') renderReportMovement(); }
+      if(val){
+        // Firebase push ได้ object {key: entry} แปลงกลับเป็น array เรียง epoch ล่าสุดก่อน
+        const arr = Object.values(val).sort((a,b)=>(b.epoch||0)-(a.epoch||0)).slice(0,500);
+        window.stockLog = arr;
+        stockLog = arr;
+      }
+      safeRun(()=>{ if(typeof renderLog==='function') renderLog(); if(typeof renderReportMovement==='function') renderReportMovement(); });
     });
 
     _db.ref('locations').on('value', snap=>{
       const val=snap.val();
-      if(val){ window.locations=val; if(typeof updateLocationSelects==='function') updateLocationSelects(); if(typeof renderLocationGrid==='function') renderLocationGrid(); }
+      if(val){ window.locations=val; safeRun(()=>{ if(typeof updateLocationSelects==='function') updateLocationSelects(); if(typeof renderLocationGrid==='function') renderLocationGrid(); }); }
     });
 
     _db.ref('rawSales').once('value', snap=>{
@@ -865,11 +883,9 @@ const LS_SALES_NAME = 'inv2_sales_name';
 
 // ── PERSISTENCE (Firebase Realtime Database) ──────────────────────────────────
 function saveToStorage(){
-  // Write to Firebase via the module-loaded helper
   if(typeof window._fbSaveStock === 'function'){
-    window._fbSaveStock(stockItems, stockLog, locations);
+    window._fbSaveStock(stockItems, locations);
   }
-  // Also keep localStorage as fallback/cache
   try{
     localStorage.setItem(LS_STOCK, JSON.stringify(stockItems));
     localStorage.setItem(LS_LOG,   JSON.stringify(stockLog.slice(0,500)));
@@ -965,9 +981,18 @@ function nowFull(){const d=new Date();return `${d.getDate()}/${d.getMonth()+1} $
 
 // ── LOG ───────────────────────────────────────────────────────────────────────
 function addLog(name, type, qty, note='', location=''){
-  stockLog.unshift({name,type,qty,note,location,ts:nowFull(),epoch:Date.now()});
+  const entry={name,type,qty,note,location,ts:nowFull(),epoch:Date.now()};
+  stockLog.unshift(entry);
   if(stockLog.length>500) stockLog.pop();
-  saveToStorage();
+  // push เฉพาะ log entry ใหม่ขึ้น Firebase (ไม่ต้อง overwrite ทั้ง array)
+  if(typeof window._fbPushLog === 'function') window._fbPushLog(entry);
+  // save stockItems และ locations
+  if(typeof window._fbSaveStock === 'function') window._fbSaveStock(stockItems, locations);
+  try{
+    localStorage.setItem(LS_STOCK, JSON.stringify(stockItems));
+    localStorage.setItem(LS_LOG,   JSON.stringify(stockLog.slice(0,500)));
+    localStorage.setItem(LS_LOC,   JSON.stringify(locations));
+  }catch(e){}
 }
 
 // ── STOCK CORE ─────────────────────────────────────────────────────────────────
