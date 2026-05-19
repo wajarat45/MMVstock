@@ -8,11 +8,10 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
-<!-- Firebase SDK -->
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-app.js";
-  import { getDatabase, ref, set, get, onValue, child } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-database.js";
-
+<!-- Firebase SDK (compat) -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<script>
   const firebaseConfig = {
     apiKey: "AIzaSyC4Fvb50rGnEN6DsxsDnfF-YtnXk-Bd0z0",
     authDomain: "mmv-stocks.firebaseapp.com",
@@ -23,89 +22,60 @@
     appId: "1:782243958905:web:f8ac19fcabad052d7284a8",
     measurementId: "G-B563KG474V"
   };
+  firebase.initializeApp(firebaseConfig);
+  const _db = firebase.database();
 
-  const app = initializeApp(firebaseConfig);
-  const db = getDatabase(app);
-
-  // ── Firebase helpers ──────────────────────────────────────────────────────────
-  window._fbDb = db;
-  window._fbRef = ref;
-  window._fbSet = set;
-  window._fbGet = get;
-  window._fbOnValue = onValue;
-  window._fbChild = child;
-
-  // ── Set connection status indicator ──
   function setFbStatus(ok, msg){
     const dot = document.getElementById('fbDot');
     const lbl = document.getElementById('fbLabel');
-    if(dot){ dot.style.background = ok ? 'var(--green)' : 'var(--red)'; }
-    if(lbl){ lbl.textContent = msg; }
+    if(dot) dot.style.background = ok ? 'var(--green)' : 'var(--red)';
+    if(lbl) lbl.textContent = msg;
   }
 
-  // ── Listen to realtime changes from Firebase ──
-  const stockRef = ref(db, 'stockItems');
-  const logRef   = ref(db, 'stockLog');
-  const locRef   = ref(db, 'locations');
-
-  onValue(stockRef, snap => {
-    window._fbReady = true;
-    setFbStatus(true, 'Firebase: เชื่อมต่อแล้ว');
-    const val = snap.val();
-    if(val){
-      window.stockItems = val;
-      if(typeof updateMetrics==='function') updateMetrics();
-      if(typeof renderLocationGrid==='function') renderLocationGrid();
-    }
-  }, err => {
-    setFbStatus(false, 'Firebase: ไม่สามารถเชื่อมต่อ');
-    console.error('Firebase stockItems error:', err);
-  });
-
-  onValue(logRef, snap => {
-    const val = snap.val();
-    if(val) window.stockLog = val;
-    if(typeof renderLog==='function') renderLog();
-    if(typeof renderReportMovement==='function') renderReportMovement();
-  });
-
-  onValue(locRef, snap => {
-    const val = snap.val();
-    if(val) window.locations = val;
-    if(typeof updateLocationSelects==='function') updateLocationSelects();
-    if(typeof renderLocationGrid==='function') renderLocationGrid();
-  });
-
-  // ── Override saveToStorage to write to Firebase ──
-  window._fbSaveStock = function(stockItems, stockLog, locations){
+  window._fbSaveStock = function(si, sl, loc){
     try{
-      set(ref(db,'stockItems'), stockItems || {});
-      set(ref(db,'stockLog'), (stockLog||[]).slice(0,500));
-      set(ref(db,'locations'), locations || {});
-    }catch(e){ console.error('Firebase save error:', e); }
+      _db.ref('stockItems').set(si||{});
+      _db.ref('stockLog').set((sl||[]).slice(0,500));
+      _db.ref('locations').set(loc||{});
+    }catch(e){ console.error('Firebase save error:',e); }
   };
 
-  window._fbSaveSales = function(rawSales){
-    try{
-      set(ref(db,'rawSales'), rawSales || []);
-    }catch(e){ console.error('Firebase sales save error:', e); }
+  window._fbSaveSales = function(rs){
+    try{ _db.ref('rawSales').set(rs||[]); }catch(e){}
   };
 
-  // ── Load sales from Firebase once ──
-  get(child(ref(db), 'rawSales')).then(snap=>{
-    if(snap.exists()){
-      window.rawSales = snap.val() || [];
-      if(window.rawSales.length){
-        if(typeof initFilter==='function') initFilter();
-        if(typeof update==='function') update();
-        if(typeof renderRank==='function') renderRank();
-        if(typeof updateSalesLabel==='function') updateSalesLabel();
-        if(typeof setSalesSavedUI==='function') setSalesSavedUI(true);
-        if(typeof updateDashboard==='function') updateDashboard();
-        if(typeof notify==='function') notify(`💾 โหลดข้อมูลยอดขาย ${window.rawSales.length} รายการ`);
+  // ── Realtime listeners (ตั้งหลัง DOM โหลด) ──
+  window.addEventListener('load', function(){
+    _db.ref('stockItems').on('value', snap=>{
+      setFbStatus(true,'Firebase: เชื่อมต่อแล้ว');
+      const val=snap.val();
+      if(val){ window.stockItems=val; if(typeof updateMetrics==='function') updateMetrics(); }
+    }, err=>{ setFbStatus(false,'Firebase: ไม่สามารถเชื่อมต่อ'); console.error(err); });
+
+    _db.ref('stockLog').on('value', snap=>{
+      const val=snap.val();
+      if(val){ window.stockLog=val; if(typeof renderLog==='function') renderLog(); if(typeof renderReportMovement==='function') renderReportMovement(); }
+    });
+
+    _db.ref('locations').on('value', snap=>{
+      const val=snap.val();
+      if(val){ window.locations=val; if(typeof updateLocationSelects==='function') updateLocationSelects(); if(typeof renderLocationGrid==='function') renderLocationGrid(); }
+    });
+
+    _db.ref('rawSales').once('value', snap=>{
+      if(snap.exists()){
+        window.rawSales=snap.val()||[];
+        if(window.rawSales.length){
+          if(typeof initFilter==='function') initFilter();
+          if(typeof update==='function') update();
+          if(typeof renderRank==='function') renderRank();
+          if(typeof setSalesSavedUI==='function') setSalesSavedUI(true);
+          if(typeof updateDashboard==='function') updateDashboard();
+          if(typeof notify==='function') notify('💾 โหลดข้อมูลยอดขาย '+window.rawSales.length+' รายการ');
+        }
       }
-    }
-  }).catch(e=>console.error('Firebase load sales error:', e));
+    });
+  });
 </script>
 <style>
 :root {
