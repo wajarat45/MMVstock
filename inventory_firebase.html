@@ -1337,6 +1337,7 @@ document.getElementById('stkCsv').addEventListener('change',e=>{
       addLog(name,'import',qty,'นำเข้าจาก CSV',loc);
       added++;
     });
+    saveToStorage();
     updateMetrics();
     notify(`📥 Import ${added} รายการสำเร็จ`);
   }});
