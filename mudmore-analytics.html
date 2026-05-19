@@ -1066,6 +1066,16 @@ body.dark .topbar .btn-primary{
             <div class="empty-chart" id="emptyTopStock"><i class="ti ti-package"></i><span>ยังไม่มีสต็อก</span></div>
           </div>
         </div>
+
+        <div class="chart-panel">
+          <div class="chart-header">
+            <div class="chart-title"><i class="ti ti-chart-pie"></i> สัดส่วนสต็อกตาม Location</div>
+          </div>
+          <div class="chart-wrap h-220">
+            <canvas id="locPieChart"></canvas>
+            <div class="empty-chart" id="emptyLocPie"><i class="ti ti-map-pin"></i><span>ยังไม่มีข้อมูล Location</span></div>
+          </div>
+        </div>
       </div>
 
       <div class="panel amber-panel">
@@ -2452,8 +2462,7 @@ function destroyStockChartsAndEmpty(){
 }
 
 function clearAllData(){
-  if(!confirm('ล้างข้อมูลสต็อกและประวัติทั้งหมด?
-(ไม่สามารถกู้คืนได้)')) return;
+  if(!confirm('ล้างข้อมูลสต็อกและประวัติทั้งหมด?\n(ไม่สามารถกู้คืนได้)')) return;
 
   stockItems={};
   stockLog=[];
@@ -2483,8 +2492,7 @@ function clearAllData(){
 }
 
 function clearSalesData(){
-  if(!confirm('ล้างข้อมูลยอดขายทั้งหมด?
-(ไม่สามารถกู้คืนได้)')) return;
+  if(!confirm('ล้างข้อมูลยอดขายทั้งหมด?\n(ไม่สามารถกู้คืนได้)')) return;
 
   window.rawSales=[];
   rawSales=[];
