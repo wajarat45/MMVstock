@@ -64,15 +64,16 @@
   // ── Realtime listeners (ตั้งหลัง DOM โหลด) ──
   window.addEventListener('load', function(){
     _db.ref('stockItems').on('value', snap=>{
-      if(window.__MMV_CLEARING__) return;
       setFbStatus(true,'Firebase: เชื่อมต่อแล้ว');
       const val=snap.val()||{};
       window.stockItems=val; stockItems=val;
-      safeRun(()=>{ if(typeof updateMetrics==='function') updateMetrics(); });
+      safeRun(()=>{
+        if(typeof updateMetrics==='function') updateMetrics();
+        if(!snap.exists() && typeof hardResetStockUI==='function') hardResetStockUI();
+      });
     }, err=>{ setFbStatus(false,'Firebase: ไม่สามารถเชื่อมต่อ'); console.error(err); });
 
     _db.ref('stockLog').on('value', snap=>{
-      if(window.__MMV_CLEARING__) return;
       const val=snap.val();
       if(val){
         // Firebase push ได้ object {key: entry} แปลงกลับเป็น array เรียง epoch ล่าสุดก่อน
@@ -83,6 +84,7 @@
         // ถูกลบจาก Firebase → clear local array ด้วย
         window.stockLog = [];
         stockLog = [];
+        if(typeof hardResetStockUI==='function') hardResetStockUI();
       }
       safeRun(()=>{ if(typeof renderLog==='function') renderLog(); if(typeof renderReportMovement==='function') renderReportMovement(); });
     });
@@ -93,7 +95,6 @@
     });
 
     _db.ref('rawSales').on('value', snap=>{
-      if(window.__MMV_CLEARING__) return;
       const exists = snap.exists();
       const val = exists ? (snap.val()||[]) : [];
       // Guard: skip only when data truly hasn't changed (non-empty → same data)
@@ -109,6 +110,9 @@
         if(typeof updateDashboard==='function') updateDashboard();
         if(typeof notify==='function') notify('💾 โหลดข้อมูลยอดขาย '+rawSales.length+' รายการ');
       } else {
+        window.rawSales = [];
+        rawSales = [];
+        if(typeof hardResetSalesUI === 'function') hardResetSalesUI();
         // Clear localStorage so other tabs don't reload stale data on refresh
         try{ localStorage.removeItem('inv2_sales'); localStorage.removeItem('inv2_sales_name'); }catch(e){}
         if(typeof setSalesSavedUI==='function') setSalesSavedUI(false);
@@ -2562,14 +2566,13 @@ async function clearAllData(){
   if(!confirm('ล้างข้อมูลสต็อกและประวัติทั้งหมด?
 (ไม่สามารถกู้คืนได้)')) return;
 
-  window.__MMV_CLEARING__ = true;
-
   stockItems = {};
   stockLog = [];
   window.stockItems = {};
   window.stockLog = [];
 
   try{
+    localStorage.setItem('MMV_CLEAR_STOCK_PING', Date.now().toString());
     localStorage.removeItem(LS_STOCK);
     localStorage.removeItem(LS_LOG);
     localStorage.removeItem('stockItems');
@@ -2595,7 +2598,6 @@ async function clearAllData(){
   setTimeout(()=>{
     hardResetStockUI();
     updateDashboard();
-    window.__MMV_CLEARING__ = false;
   }, 500);
 
   notify('🗑️ ล้างข้อมูลสต็อกทั้งหมดแล้ว');
@@ -2605,12 +2607,11 @@ async function clearSalesData(){
   if(!confirm('ล้างข้อมูลยอดขายทั้งหมด?
 (ไม่สามารถกู้คืนได้)')) return;
 
-  window.__MMV_CLEARING__ = true;
-
   window.rawSales = [];
   rawSales = [];
 
   try{
+    localStorage.setItem('MMV_CLEAR_SALES_PING', Date.now().toString());
     localStorage.removeItem(LS_SALES);
     localStorage.removeItem(LS_SALES_NAME);
     localStorage.removeItem('salesData');
@@ -2637,7 +2638,6 @@ async function clearSalesData(){
   setTimeout(()=>{
     hardResetSalesUI();
     updateDashboard();
-    window.__MMV_CLEARING__ = false;
   }, 500);
 
   notify('🗑️ ล้างข้อมูลยอดขายแล้ว');
@@ -2916,6 +2916,23 @@ setTimeout(()=>{
 loadingBlocks.forEach(el=>el.style.display='none');
 },1200);
 
+});
+</script>
+
+
+<script id="cross-tab-clear-fallback">
+window.addEventListener('storage', function(e){
+  if(e.key === 'MMV_CLEAR_SALES_PING'){
+    window.rawSales=[]; rawSales=[];
+    if(typeof hardResetSalesUI==='function') hardResetSalesUI();
+    if(typeof updateDashboard==='function') updateDashboard();
+  }
+  if(e.key === 'MMV_CLEAR_STOCK_PING'){
+    window.stockItems={}; stockItems={};
+    window.stockLog=[]; stockLog=[];
+    if(typeof hardResetStockUI==='function') hardResetStockUI();
+    if(typeof updateDashboard==='function') updateDashboard();
+  }
 });
 </script>
 
