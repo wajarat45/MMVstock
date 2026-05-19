@@ -61,7 +61,7 @@
     _db.ref('stockItems').on('value', snap=>{
       setFbStatus(true,'Firebase: เชื่อมต่อแล้ว');
       const val=snap.val();
-      if(val){ window.stockItems=val; safeRun(()=>{ if(typeof updateMetrics==='function') updateMetrics(); }); }
+      if(val){ window.stockItems=val; stockItems=val; safeRun(()=>{ if(typeof updateMetrics==='function') updateMetrics(); }); }
     }, err=>{ setFbStatus(false,'Firebase: ไม่สามารถเชื่อมต่อ'); console.error(err); });
 
     _db.ref('stockLog').on('value', snap=>{
@@ -77,7 +77,7 @@
 
     _db.ref('locations').on('value', snap=>{
       const val=snap.val();
-      if(val){ window.locations=val; safeRun(()=>{ if(typeof updateLocationSelects==='function') updateLocationSelects(); if(typeof renderLocationGrid==='function') renderLocationGrid(); }); }
+      if(val){ window.locations=val; locations=val; safeRun(()=>{ if(typeof updateLocationSelects==='function') updateLocationSelects(); if(typeof renderLocationGrid==='function') renderLocationGrid(); }); }
     });
 
     _db.ref('rawSales').once('value', snap=>{
