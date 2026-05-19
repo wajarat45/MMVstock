@@ -107,13 +107,21 @@
         if(typeof initFilter==='function') initFilter();
         [window.tChart,window.rChart,window.pChart,window.rankChart].forEach(c=>{if(c) c.destroy();});
         window.tChart=null;window.rChart=null;window.pChart=null;window.rankChart=null;
+        tChart=null;rChart=null;pChart=null;rankChart=null;
         ['emptyTrend','emptyBar','emptyPie','emptyRank'].forEach(id=>{const el=document.getElementById(id);if(el)el.style.display='';});
-        const rankTbody=document.getElementById('rankTbody');
-        if(rankTbody) rankTbody.innerHTML='<tr class="empty-row"><td colspan="7">ยังไม่มีข้อมูล</td></tr>';
+        const rankTbody2=document.getElementById('rankTbody');
+        if(rankTbody2) rankTbody2.innerHTML='<tr class="empty-row"><td colspan="7">ยังไม่มีข้อมูล</td></tr>';
         ['mTotal','mOrders','mAvg','mReps','mTopVal'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent='—';});
-        const mTopName=document.getElementById('mTopName');if(mTopName)mTopName.textContent='—';
-        const fnLabel=document.getElementById('fnLabel');if(fnLabel)fnLabel.textContent='Upload CSV ยอดขาย';
-        const fnLabelRank=document.getElementById('fnLabelRank');if(fnLabelRank)fnLabelRank.textContent='Upload CSV ยอดขาย';
+        const mTopName2=document.getElementById('mTopName');if(mTopName2)mTopName2.textContent='—';
+        const fnLabel2=document.getElementById('fnLabel');if(fnLabel2)fnLabel2.textContent='Upload CSV ยอดขาย';
+        const fnLabelRank2=document.getElementById('fnLabelRank');if(fnLabelRank2)fnLabelRank2.textContent='Upload CSV ยอดขาย';
+        ['bRange','bTop','bAvg','bLow'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent=id==='bRange'?'ALL DATA':'—';});
+        const repFilter2=document.getElementById('repFilter');
+        if(repFilter2){repFilter2.innerHTML='<option value="all">All sales people</option>';repFilter2.disabled=true;}
+        const ptHeat2=document.getElementById('ptHeatmapWrap');if(ptHeat2)ptHeat2.style.display='none';
+        const ptEmpty2=document.getElementById('ptEmpty');if(ptEmpty2)ptEmpty2.style.display='';
+        const fi2a=document.getElementById('fi');if(fi2a)fi2a.value='';
+        const fi2b=document.getElementById('fi2');if(fi2b)fi2b.value='';
       }
     });
   });
