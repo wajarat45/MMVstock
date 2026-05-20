@@ -2634,7 +2634,14 @@ function renderPOSProducts(){
 
 function addToCart(name){
 
+  const stock = stockItems[name] ? (stockItems[name].qty || 0) : 0;
   const found = posCart.find(i=>i.name===name);
+  const currentQty = found ? found.qty : 0;
+
+  if(currentQty >= stock){
+    notify(`⚠️ สต็อก ${name} เหลือแค่ ${stock} ชิ้น`, true);
+    return;
+  }
 
   if(found){
     found.qty += 1;
