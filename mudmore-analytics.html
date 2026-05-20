@@ -77,7 +77,10 @@
         const alertBody=document.getElementById('alertTableBody');
         if(alertBody)alertBody.innerHTML='<tr class="empty-row"><td colspan="5">ไม่มีสินค้าใกล้หมด</td></tr>';
       }
-      safeRun(()=>{ if(typeof updateMetrics==='function') updateMetrics(); });
+      safeRun(()=>{ 
+        if(typeof updateMetrics==='function') updateMetrics();
+        if(typeof renderPOSProducts==='function') renderPOSProducts();
+      });
     }, err=>{ setFbStatus(false,'Firebase: ไม่สามารถเชื่อมต่อ'); console.error(err); });
 
     _db.ref('stockLog').on('value', snap=>{
