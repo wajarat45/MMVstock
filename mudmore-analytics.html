@@ -67,7 +67,7 @@
       setFbStatus(true,'Firebase: เชื่อมต่อแล้ว');
       const val=snap.val()||{};
       window.stockItems=val; stockItems=val;
-      if(!snap.exists() || Object.keys(val).length===0){
+      if(!snap.exists()){
         // ถูกลบจาก Firebase → destroy stock charts ทุกแถบ
         [window.movChart,window.locPieChart,window.topStockChart].forEach(c=>{try{if(c&&typeof c.destroy==='function')c.destroy();}catch(e){}});
         window.movChart=null;window.locPieChart=null;window.topStockChart=null;
@@ -2752,6 +2752,8 @@ function checkoutPOS(){
 
   });
 
+  posCart = [];
+
   if(typeof _fbSaveStock === 'function'){
     _fbSaveStock(stockItems, locations);
   }
@@ -2769,8 +2771,6 @@ function checkoutPOS(){
   }else{
     alert('ขายสินค้าเรียบร้อย');
   }
-
-  posCart = [];
 
   renderPOSCart();
   renderPOSProducts();
