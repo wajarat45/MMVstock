@@ -67,6 +67,16 @@
       setFbStatus(true,'Firebase: เชื่อมต่อแล้ว');
       const val=snap.val()||{};
       window.stockItems=val; stockItems=val;
+      if(!snap.exists() || Object.keys(val).length===0){
+        // ถูกลบจาก Firebase → destroy stock charts ทุกแถบ
+        [window.movChart,window.locPieChart,window.topStockChart].forEach(c=>{try{if(c&&typeof c.destroy==='function')c.destroy();}catch(e){}});
+        window.movChart=null;window.locPieChart=null;window.topStockChart=null;
+        movChart=null;locPieChart=null;topStockChart=null;
+        ['movementChart','topStockChart','locPieChart'].forEach(id=>{const c=document.getElementById(id);if(c){const ctx=c.getContext&&c.getContext('2d');if(ctx)ctx.clearRect(0,0,c.width,c.height);c.style.display='none';}});
+        ['emptyMovement','emptyTopStock','emptyLocPie'].forEach(id=>{const el=document.getElementById(id);if(el)el.style.display='flex';});
+        const alertBody=document.getElementById('alertTableBody');
+        if(alertBody)alertBody.innerHTML='<tr class="empty-row"><td colspan="5">ไม่มีสินค้าใกล้หมด</td></tr>';
+      }
       safeRun(()=>{ if(typeof updateMetrics==='function') updateMetrics(); });
     }, err=>{ setFbStatus(false,'Firebase: ไม่สามารถเชื่อมต่อ'); console.error(err); });
 
@@ -1672,7 +1682,7 @@ function adjustStock(mode){
   if(qty<=0){notify('กรุณาระบุจำนวนที่ถูกต้อง',true);return}
 
   if(!stockItems[name]){
-    stockItems[name]={qty:0,unit:unit||'ชิ้น',minQty:min,maxQty:qty,soldQty:0,location:''};
+    stockItems[name]={qty:0,unit:unit||'ชิ้น',minQty:min,maxQty:qty,soldQty:0,location:'',price:0};
   }
   const item=stockItems[name];
   if(unit) item.unit=unit;
@@ -1705,7 +1715,7 @@ function receiveStock(){
   if(!name){notify('กรุณาระบุชื่อสินค้า',true);return}
   if(qty<=0){notify('กรุณาระบุจำนวน',true);return}
 
-  if(!stockItems[name]) stockItems[name]={qty:0,unit:unit||'ชิ้น',minQty:0,maxQty:0,soldQty:0,location:loc};
+  if(!stockItems[name]) stockItems[name]={qty:0,unit:unit||'ชิ้น',minQty:0,maxQty:0,soldQty:0,location:loc,price:0};
   const item=stockItems[name];
   item.qty+=qty;
   item.maxQty=Math.max(item.maxQty,item.qty);
