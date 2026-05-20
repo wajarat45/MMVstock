@@ -2780,15 +2780,6 @@ function checkoutPOS(){
 
 }
 
-document.addEventListener('click',()=>{
-
-  setTimeout(()=>{
-    renderPOSProducts();
-    renderPOSCart();
-  },300);
-
-});
-
 window.addEventListener('load', ()=>{
   setTimeout(renderPOSProducts, 1200);
 });
