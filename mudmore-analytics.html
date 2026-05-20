@@ -2241,7 +2241,7 @@ function renderTrend(data){
   const vals=labels.map(k=>byDate[k]);
   const emptyEl=document.getElementById('emptyTrend');
   const canvas=document.getElementById('trendChart');
-  if(!labels.length){if(emptyEl)emptyEl.style.display='';if(canvas)canvas.style.display='none';return}
+  if(!labels.length){if(emptyEl)emptyEl.style.display='flex';if(canvas)canvas.style.display='none';return}
   if(emptyEl)emptyEl.style.display='none';if(canvas)canvas.style.display='block';
   if(tChart) tChart.destroy();
   tChart=new Chart(canvas,{
@@ -2258,7 +2258,7 @@ function renderReps(data,reps,repTotals){
   const emptyPie=document.getElementById('emptyPie');
   const pieCanvas=document.getElementById('pieChart');
   if(!sorted.length){
-    [emptyBar,emptyPie].forEach(e=>{if(e)e.style.display=''});
+    [emptyBar,emptyPie].forEach(e=>{if(e)e.style.display='flex'});
     [repCanvas,pieCanvas].forEach(c=>{if(c)c.style.display='none'});
     return;
   }
@@ -2784,6 +2784,7 @@ document.addEventListener('click',()=>{
 
   setTimeout(()=>{
     renderPOSProducts();
+    renderPOSCart();
   },300);
 
 });
