@@ -34,13 +34,13 @@
 
   window._fbSaveStock = function(si, loc){
     try{
-      // Pause listener so our own write doesn't bounce back and overwrite local data
-      window._pauseStockListener = true;
+      // Record time of local write so listener can ignore the echo
+      window._lastLocalWrite = Date.now();
       if(!si||!Object.keys(si).length) _db.ref('stockItems').remove();
       else _db.ref('stockItems').set(si);
       if(!loc||!Object.keys(loc).length) _db.ref('locations').remove();
       else _db.ref('locations').set(loc);
-    }catch(e){ console.error('Firebase save error:',e); window._pauseStockListener=false; }
+    }catch(e){ console.error('Firebase save error:',e); }
   };
 
   window._fbPushLog = function(entry){
@@ -63,16 +63,23 @@
 
   function safeRun(fn){ if(!isUserTyping()) fn(); else setTimeout(fn,1500); }
 
-  // Flag to pause stockItems listener after a local write (to prevent echo-overwrite)
-  window._pauseStockListener = false;
+  // Timestamp of last local write — ignore Firebase echoes within 3 seconds
+  window._lastLocalWrite = 0;
 
   window.addEventListener('load', function(){
     _db.ref('stockItems').on('value', snap=>{
       setFbStatus(true,'Firebase: เชื่อมต่อแล้ว');
-      if(window._pauseStockListener){ window._pauseStockListener=false; return; }
       const val=snap.val()||{};
+      const now = Date.now();
+      // If this snapshot arrived within 3s of our own write AND Firebase has fewer/equal items, skip
+      if((now - window._lastLocalWrite) < 3000 && Object.keys(val).length <= Object.keys(stockItems).length){
+        return;
+      }
       window.stockItems=val; stockItems=val;
-      safeRun(()=>{ if(typeof updateMetrics==='function') updateMetrics(); });
+      safeRun(()=>{
+        if(typeof updateMetrics==='function') updateMetrics();
+        if(typeof renderPOSProducts==='function') renderPOSProducts();
+      });
     }, err=>{ setFbStatus(false,'Firebase: ไม่สามารถเชื่อมต่อ'); console.error(err); });
 
     _db.ref('stockLog').on('value', snap=>{
