@@ -84,19 +84,22 @@
       const now = Date.now();
 
       if(fbFirstLoad){
-        // On first load, always trust Firebase over localStorage
+        // On first load, trust Firebase UNLESS we just did a local import (within 10s)
         fbFirstLoad = false;
         clearTimeout(fbFallbackTimer);
-        window.stockItems=val; stockItems=val;
-        try{ localStorage.setItem('inv2_stock', JSON.stringify(val)); }catch(e){}
+        const justImported = (Date.now() - window._lastLocalWrite) < 10000;
+        if(!justImported){
+          window.stockItems=val; stockItems=val;
+          try{ localStorage.setItem('inv2_stock', JSON.stringify(val)); }catch(e){}
+        }
         if(overlay) overlay.style.display='none';
         if(typeof updateMetrics==='function') updateMetrics();
         if(typeof renderPOSProducts==='function') renderPOSProducts();
         return;
       }
 
-      // Subsequent updates: skip only if echo of our own write AND data identical
-      if((now - window._lastLocalWrite) < 3000 && JSON.stringify(val)===JSON.stringify(stockItems)){
+      // Subsequent updates: skip if echo of our own write (within 10s)
+      if((now - window._lastLocalWrite) < 10000){
         return;
       }
       window.stockItems=val; stockItems=val;
@@ -1263,13 +1266,16 @@ document.getElementById('stkCsv').addEventListener('change',e=>{
       logEntries.push({name,type:'import',qty,note:'นำเข้าจาก CSV',location:loc,ts:nowFull(),epoch:Date.now()});
       added++;
     });
-    saveToStorage();
+    // Mark local write BEFORE saving so Firebase echo is ignored
+    window._lastLocalWrite = Date.now();
     logEntries.forEach(entry=>{
       stockLog.unshift(entry);
       if(typeof window._fbPushLog==='function') window._fbPushLog(entry);
     });
     if(stockLog.length>500) stockLog.length=500;
     try{ localStorage.setItem(LS_LOG, JSON.stringify(stockLog.slice(0,500))); }catch(e){}
+    // Save AFTER log is ready so Firebase gets complete data
+    saveToStorage();
     updateMetrics();
     notify(`📥 Import ${added} รายการสำเร็จ`);
   }});
