@@ -1139,7 +1139,7 @@ function adjustStock(mode){
   }
   const item=stockItems[name];
   if(unit) item.unit=unit;
-  if(price > 0) item.price=price;  // update price if provided
+  item.price=price;  // always save price (even 0)
   if(min) item.minQty=min;
   if(loc) item.location=loc;
 
