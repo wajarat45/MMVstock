@@ -132,7 +132,11 @@
 
     _db.ref('locations').on('value', snap=>{
       const val=snap.val();
-      if(val){ window.locations=val; locations=val; safeRun(()=>{ if(typeof updateLocationSelects==='function') updateLocationSelects(); if(typeof renderLocationGrid==='function') renderLocationGrid(); }); }
+      const now = Date.now();
+      if((now - window._lastLocalWrite) < 10000) return; // ignore echo
+      if(val){ window.locations=val; locations=val; }
+      else { window.locations={}; locations={}; }
+      safeRun(()=>{ if(typeof updateLocationSelects==='function') updateLocationSelects(); if(typeof renderLocationGrid==='function') renderLocationGrid(); });
     });
 
     _db.ref('rawSales').on('value', snap=>{
@@ -964,6 +968,7 @@ const LS_SALES_NAME = 'inv2_sales_name';
 
 // ── PERSISTENCE ──────────────────────────────────────────────────────────────
 function saveToStorage(){
+  window._lastLocalWrite = Date.now();
   if(typeof window._fbSaveStock === 'function') window._fbSaveStock(stockItems, locations);
   try{
     localStorage.setItem(LS_STOCK, JSON.stringify(stockItems));
@@ -1641,6 +1646,7 @@ function renderRank(){
 function autoDeductStock(data){
   let deducted=0;const missed=new Set();
   const findMatch=n=>{n=n.toLowerCase();const exact=Object.keys(stockItems).find(k=>k.toLowerCase()===n);if(exact)return exact;return Object.keys(stockItems).find(k=>n.includes(k.toLowerCase())||k.toLowerCase().includes(n))||null};
+  const logEntries=[];
   data.forEach(row=>{
     const rawProd=getProduct(row);if(!rawProd)return;
     const parts=rawProd.split('+').map(p=>p.trim()).filter(Boolean);
@@ -1648,11 +1654,19 @@ function autoDeductStock(data){
     parts.forEach(part=>{
       const match=findMatch(part);
       if(match){
-        if(stockItems[match].qty>=qty){stockItems[match].qty-=qty;stockItems[match].soldQty=(stockItems[match].soldQty||0)+qty;addLog(match,'out',qty,'หักจาก CSV ยอดขาย');deducted++}
-        else if(stockItems[match].qty>0){const left=stockItems[match].qty;stockItems[match].soldQty=(stockItems[match].soldQty||0)+left;addLog(match,'out',left,'หักจาก CSV (หมดสต็อก)');stockItems[match].qty=0;deducted++}
+        if(stockItems[match].qty>=qty){stockItems[match].qty-=qty;stockItems[match].soldQty=(stockItems[match].soldQty||0)+qty;logEntries.push({name:match,type:'out',qty,note:'หักจาก CSV ยอดขาย',location:stockItems[match].location||'',ts:nowFull(),epoch:Date.now()});deducted++}
+        else if(stockItems[match].qty>0){const left=stockItems[match].qty;stockItems[match].soldQty=(stockItems[match].soldQty||0)+left;logEntries.push({name:match,type:'out',qty:left,note:'หักจาก CSV (หมดสต็อก)',location:stockItems[match].location||'',ts:nowFull(),epoch:Date.now()});stockItems[match].qty=0;deducted++}
       } else missed.add(part);
     });
   });
+  if(logEntries.length){
+    // Batch: push logs then save once
+    logEntries.forEach(entry=>{ stockLog.unshift(entry); if(typeof window._fbPushLog==='function') window._fbPushLog(entry); });
+    if(stockLog.length>500) stockLog.length=500;
+    window._lastLocalWrite = Date.now();
+    if(typeof window._fbSaveStock==='function') window._fbSaveStock(stockItems, locations);
+    try{ localStorage.setItem(LS_STOCK, JSON.stringify(stockItems)); localStorage.setItem(LS_LOG, JSON.stringify(stockLog.slice(0,500))); }catch(e){}
+  }
   if(deducted>0){notify(`🔄 หักสต็อกอัตโนมัติ ${deducted} รายการ`);updateMetrics()}
   if(missed.size>0) setTimeout(()=>notify(`⚠️ ไม่พบสต็อก: ${[...missed].slice(0,3).join(', ')}`,true),600);
 }
@@ -1699,6 +1713,7 @@ function destroyStockChartsAndEmpty(){
 
 function clearAllData(){
   if(!confirm('ล้างข้อมูลสต็อกและประวัติทั้งหมด?')) return;
+  window._lastLocalWrite = Date.now();
   stockItems={};stockLog=[];window.stockItems={};window.stockLog=[];
   try{if(typeof _db!=='undefined'){_db.ref('stockItems').remove();_db.ref('stockLog').remove();}}catch(e){}
   try{localStorage.removeItem(LS_STOCK);localStorage.removeItem(LS_LOG);}catch(e){}
@@ -1868,7 +1883,7 @@ function checkoutPOS(){
       salesperson: 'POS'
     });
   });
-  if(typeof _fbSaveStock === 'function') _fbSaveStock(stockItems, locations);
+  // addLog already calls _fbSaveStock, just save sales separately
   if(typeof _fbSaveSales === 'function') _fbSaveSales(rawSales);
   if(typeof update === 'function') update();
   if(typeof renderRank === 'function') renderRank();
