@@ -67,22 +67,52 @@
   window._lastLocalWrite = 0;
 
   window.addEventListener('load', function(){
+    // Show loading overlay while waiting for Firebase first response
+    const overlay = document.getElementById('fbLoadingOverlay');
+
+    // Fallback: if Firebase takes > 5s, show cached data anyway
+    const fbFallbackTimer = setTimeout(()=>{
+      if(overlay) overlay.style.display='none';
+      if(typeof updateMetrics==='function') updateMetrics();
+    }, 5000);
+
+    let fbFirstLoad = true;
+
     _db.ref('stockItems').on('value', snap=>{
       setFbStatus(true,'Firebase: เชื่อมต่อแล้ว');
       const val=snap.val()||{};
       const now = Date.now();
-      // Skip only if this is an echo of our own write (within 3s) AND data is identical
+
+      if(fbFirstLoad){
+        // On first load, always trust Firebase over localStorage
+        fbFirstLoad = false;
+        clearTimeout(fbFallbackTimer);
+        window.stockItems=val; stockItems=val;
+        try{ localStorage.setItem('inv2_stock', JSON.stringify(val)); }catch(e){}
+        if(overlay) overlay.style.display='none';
+        if(typeof updateMetrics==='function') updateMetrics();
+        if(typeof renderPOSProducts==='function') renderPOSProducts();
+        return;
+      }
+
+      // Subsequent updates: skip only if echo of our own write AND data identical
       if((now - window._lastLocalWrite) < 3000 && JSON.stringify(val)===JSON.stringify(stockItems)){
         return;
       }
       window.stockItems=val; stockItems=val;
-      // Always persist latest Firebase data to localStorage so all devices stay in sync
       try{ localStorage.setItem('inv2_stock', JSON.stringify(val)); }catch(e){}
       safeRun(()=>{
         if(typeof updateMetrics==='function') updateMetrics();
         if(typeof renderPOSProducts==='function') renderPOSProducts();
       });
-    }, err=>{ setFbStatus(false,'Firebase: ไม่สามารถเชื่อมต่อ'); console.error(err); });
+    }, err=>{
+      setFbStatus(false,'Firebase: ไม่สามารถเชื่อมต่อ');
+      clearTimeout(fbFallbackTimer);
+      fbFirstLoad = false;
+      if(overlay) overlay.style.display='none';
+      if(typeof updateMetrics==='function') updateMetrics();
+      console.error(err);
+    });
 
     _db.ref('stockLog').on('value', snap=>{
       const val=snap.val();
@@ -513,6 +543,13 @@ body.dark .page-title span{color:#c88a43 !important;}
 </head>
 <body>
 <div class="notif-stack" id="notifStack"></div>
+
+<!-- Firebase Loading Overlay -->
+<div id="fbLoadingOverlay" style="position:fixed;inset:0;z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;background:var(--bg)">
+  <div style="width:44px;height:44px;border:3px solid var(--border2);border-top-color:#b8752a;border-radius:50%;animation:fbSpin .7s linear infinite"></div>
+  <div style="font-family:'DM Mono',monospace;font-size:12px;color:#9a968f;letter-spacing:.5px">กำลังโหลดข้อมูล…</div>
+</div>
+<style>@keyframes fbSpin{to{transform:rotate(360deg)}}</style>
 
 <div class="app">
 <div class="layout">
