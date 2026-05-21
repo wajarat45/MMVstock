@@ -71,11 +71,13 @@
       setFbStatus(true,'Firebase: เชื่อมต่อแล้ว');
       const val=snap.val()||{};
       const now = Date.now();
-      // If this snapshot arrived within 3s of our own write AND Firebase has fewer/equal items, skip
-      if((now - window._lastLocalWrite) < 3000 && Object.keys(val).length <= Object.keys(stockItems).length){
+      // Skip only if this is an echo of our own write (within 3s) AND data is identical
+      if((now - window._lastLocalWrite) < 3000 && JSON.stringify(val)===JSON.stringify(stockItems)){
         return;
       }
       window.stockItems=val; stockItems=val;
+      // Always persist latest Firebase data to localStorage so all devices stay in sync
+      try{ localStorage.setItem('inv2_stock', JSON.stringify(val)); }catch(e){}
       safeRun(()=>{
         if(typeof updateMetrics==='function') updateMetrics();
         if(typeof renderPOSProducts==='function') renderPOSProducts();
