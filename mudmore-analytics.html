@@ -105,7 +105,9 @@
 
     _db.ref('rawSales').on('value', snap=>{
       const exists = snap.exists();
-      const val = exists ? (snap.val()||[]) : [];
+      // Firebase stores arrays as objects {0:{...},1:{...}} — convert back to array
+      const raw = exists ? (snap.val()||{}) : {};
+      const val = Array.isArray(raw) ? raw : Object.values(raw);
       if(exists && val.length > 0 && JSON.stringify(val)===JSON.stringify(window.rawSales)) return;
       window.rawSales=val;
       rawSales=val;
@@ -1419,7 +1421,7 @@ function handleSalesUpload(file){
   const shortName = file.name.length>20 ? file.name.slice(0,18)+'…' : file.name;
   const prevCount = rawSales.length;
   Papa.parse(file,{header:true,skipEmptyLines:true,complete:r=>{
-    rawSales = rawSales.concat(r.data);
+    rawSales = [...rawSales, ...r.data];
     let namesList = [];
     try{ namesList = JSON.parse(localStorage.getItem(LS_SALES_NAME)||'[]'); }catch(e){ namesList=[]; }
     if(!Array.isArray(namesList)) namesList = namesList ? [namesList] : [];
