@@ -1363,9 +1363,9 @@ function updateDashboard(){
   const heroSalesEl = document.getElementById('d-hero-sales');
   const heroOrdersEl = document.getElementById('d-hero-orders');
   const heroAvgEl = document.getElementById('d-hero-avg');
-  if(heroSalesEl) heroSalesEl.textContent = totalSales>0 ? fmtSales(totalSales) : '—';
+  if(heroSalesEl) heroSalesEl.textContent = totalSales>0 ? Math.round(totalSales).toLocaleString() : '—';
   if(heroOrdersEl) heroOrdersEl.textContent = totalOrders>0 ? totalOrders.toLocaleString() : '—';
-  if(heroAvgEl) heroAvgEl.textContent = avgOrder>0 ? fmtSales(avgOrder) : '—';
+  if(heroAvgEl) heroAvgEl.textContent = avgOrder>0 ? Math.round(avgOrder).toLocaleString() : '—';
 
   const alertItems=Object.entries(stockItems).filter(([,i])=>getStatus(i)!=='ok');
   const ab=document.getElementById('alertTableBody');
