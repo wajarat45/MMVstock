@@ -71,8 +71,11 @@
       setFbStatus(true,'Firebase: เชื่อมต่อแล้ว');
       const val=snap.val()||{};
       const now = Date.now();
-      // If this snapshot arrived within 3s of our own write AND Firebase has fewer/equal items, skip
-      if((now - window._lastLocalWrite) < 3000 && Object.keys(val).length <= Object.keys(stockItems).length){
+      const incomingCount = Object.keys(val).length;
+      const localCount = Object.keys(stockItems).length;
+      // Skip echo only if: within 3s of our write AND incoming has fewer items than local
+      // Always allow if incoming is empty (clear operation) and local is also empty
+      if((now - window._lastLocalWrite) < 3000 && incomingCount < localCount){
         return;
       }
       window.stockItems=val; stockItems=val;
@@ -1654,7 +1657,7 @@ function destroyStockChartsAndEmpty(){
 
 function clearAllData(){
   if(!confirm('ล้างข้อมูลสต็อกและประวัติทั้งหมด?')) return;
-  stockItems={};stockLog=[];window.stockItems={};window.stockLog=[];
+  stockItems={};stockLog=[];window.stockItems={};window.stockLog=[];window._lastLocalWrite=0;
   try{if(typeof _db!=='undefined'){_db.ref('stockItems').remove();_db.ref('stockLog').remove();}}catch(e){}
   try{localStorage.removeItem(LS_STOCK);localStorage.removeItem(LS_LOG);}catch(e){}
   destroyStockChartsAndEmpty();updateMetrics();renderTable();renderReportMovement();renderReportStock();updateDashboard();
