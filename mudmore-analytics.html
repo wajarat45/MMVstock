@@ -73,9 +73,9 @@
       const now = Date.now();
       const incomingCount = Object.keys(val).length;
       const localCount = Object.keys(stockItems).length;
-      // Skip echo only if: within 3s of our write AND incoming has fewer items than local
-      // Always allow if incoming is empty (clear operation) and local is also empty
-      if((now - window._lastLocalWrite) < 3000 && incomingCount < localCount){
+      // Skip echo if: within 3s of our own write (same or fewer SKUs = our echo, not new data)
+      // Allow through if: empty (clear op), or more SKUs (new data from another device)
+      if((now - window._lastLocalWrite) < 3000 && incomingCount > 0 && incomingCount <= localCount){
         return;
       }
       window.stockItems=val; stockItems=val;
@@ -1428,7 +1428,7 @@ function handleSalesUpload(file){
     if(!namesList.includes(shortName)) namesList.push(shortName);
     localStorage.setItem(LS_SALES_NAME, JSON.stringify(namesList));
     saveSalesToStorage();
-    initFilter(); update(); autoDeductStock(r.data); renderRank();
+    initFilter(); update(); autoDeductStock(r.data); updatePricesFromSales(r.data); renderRank();
     setSalesSavedUI(true); updateSalesLabel(); updateDashboard();
     const added = rawSales.length - prevCount;
     notify(`✅ เพิ่ม ${added} รายการ — รวม ${rawSales.length} รายการ`);
@@ -1615,6 +1615,43 @@ function autoDeductStock(data){
   });
   if(deducted>0){notify(`🔄 หักสต็อกอัตโนมัติ ${deducted} รายการ`);updateMetrics()}
   if(missed.size>0) setTimeout(()=>notify(`⚠️ ไม่พบสต็อก: ${[...missed].slice(0,3).join(', ')}`,true),600);
+}
+
+// ── UPDATE PRICES FROM SALES CSV ─────────────────────────────────────────────
+// ดึง Price_Per_Unit จาก CSV ไปอัปเดตราคาใน stockItems อัตโนมัติ
+// ใช้ราคาสูงสุดของแต่ละสินค้าเป็น reference price
+function updatePricesFromSales(data){
+  const priceMap = {};
+  const priceKey = Object.keys(data[0]||{}).find(k=>{
+    const n = k.trim().toLowerCase().replace(/[\s_]+/g,'');
+    return n==='priceperunit'||n==='price'||n==='unitprice'||n==='ราคา'||n==='ราคาต่อหน่วย';
+  });
+  const productKey = Object.keys(data[0]||{}).find(k=>{
+    const n = k.trim().toLowerCase();
+    return n.includes('item_name')||n.includes('item')||n.includes('product');
+  });
+  if(!priceKey||!productKey) return;
+  data.forEach(row=>{
+    const name = (row[productKey]||'').toString().trim();
+    const price = parseFloat((row[priceKey]||'0').toString().replace(/[^0-9.]/g,''))||0;
+    if(!name||price<=0) return;
+    // ใช้ราคาล่าสุดของแต่ละสินค้า (override ถ้าเจอราคาใหม่)
+    priceMap[name] = price;
+  });
+  let updated = 0;
+  Object.entries(priceMap).forEach(([name, price])=>{
+    // หา match ใน stockItems (exact หรือ fuzzy)
+    const match = Object.keys(stockItems).find(k=>k===name) ||
+                  Object.keys(stockItems).find(k=>k.toLowerCase()===name.toLowerCase());
+    if(match && stockItems[match]){
+      stockItems[match].price = price;
+      updated++;
+    }
+  });
+  if(updated>0){
+    saveToStorage();
+    notify(`💰 อัปเดตราคา ${updated} รายการจาก CSV`);
+  }
 }
 
 // ── EXPORT ────────────────────────────────────────────────────────────────────
