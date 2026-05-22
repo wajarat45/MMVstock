@@ -67,55 +67,20 @@
   window._lastLocalWrite = 0;
 
   window.addEventListener('load', function(){
-    // Show loading overlay while waiting for Firebase first response
-    const overlay = document.getElementById('fbLoadingOverlay');
-
-    // Fallback: if Firebase takes > 5s, show cached data anyway
-    const fbFallbackTimer = setTimeout(()=>{
-      if(overlay) overlay.style.display='none';
-      if(typeof updateMetrics==='function') updateMetrics();
-    }, 5000);
-
-    let fbFirstLoad = true;
-
     _db.ref('stockItems').on('value', snap=>{
       setFbStatus(true,'Firebase: เชื่อมต่อแล้ว');
       const val=snap.val()||{};
       const now = Date.now();
-
-      if(fbFirstLoad){
-        // On first load, trust Firebase UNLESS we just did a local import (within 10s)
-        fbFirstLoad = false;
-        clearTimeout(fbFallbackTimer);
-        const justImported = (Date.now() - window._lastLocalWrite) < 10000;
-        if(!justImported){
-          window.stockItems=val; stockItems=val;
-          try{ localStorage.setItem('inv2_stock', JSON.stringify(val)); }catch(e){}
-        }
-        if(overlay) overlay.style.display='none';
-        if(typeof updateMetrics==='function') updateMetrics();
-        if(typeof renderPOSProducts==='function') renderPOSProducts();
-        return;
-      }
-
-      // Subsequent updates: skip if echo of our own write (within 10s)
-      if((now - window._lastLocalWrite) < 10000){
+      // If this snapshot arrived within 3s of our own write AND Firebase has fewer/equal items, skip
+      if((now - window._lastLocalWrite) < 3000 && Object.keys(val).length <= Object.keys(stockItems).length){
         return;
       }
       window.stockItems=val; stockItems=val;
-      try{ localStorage.setItem('inv2_stock', JSON.stringify(val)); }catch(e){}
       safeRun(()=>{
         if(typeof updateMetrics==='function') updateMetrics();
         if(typeof renderPOSProducts==='function') renderPOSProducts();
       });
-    }, err=>{
-      setFbStatus(false,'Firebase: ไม่สามารถเชื่อมต่อ');
-      clearTimeout(fbFallbackTimer);
-      fbFirstLoad = false;
-      if(overlay) overlay.style.display='none';
-      if(typeof updateMetrics==='function') updateMetrics();
-      console.error(err);
-    });
+    }, err=>{ setFbStatus(false,'Firebase: ไม่สามารถเชื่อมต่อ'); console.error(err); });
 
     _db.ref('stockLog').on('value', snap=>{
       const val=snap.val();
@@ -132,11 +97,7 @@
 
     _db.ref('locations').on('value', snap=>{
       const val=snap.val();
-      const now = Date.now();
-      if((now - window._lastLocalWrite) < 10000) return; // ignore echo
-      if(val){ window.locations=val; locations=val; }
-      else { window.locations={}; locations={}; }
-      safeRun(()=>{ if(typeof updateLocationSelects==='function') updateLocationSelects(); if(typeof renderLocationGrid==='function') renderLocationGrid(); });
+      if(val){ window.locations=val; locations=val; safeRun(()=>{ if(typeof updateLocationSelects==='function') updateLocationSelects(); if(typeof renderLocationGrid==='function') renderLocationGrid(); }); }
     });
 
     _db.ref('rawSales').on('value', snap=>{
@@ -551,13 +512,6 @@ body.dark .page-title span{color:#c88a43 !important;}
 <body>
 <div class="notif-stack" id="notifStack"></div>
 
-<!-- Firebase Loading Overlay -->
-<div id="fbLoadingOverlay" style="position:fixed;inset:0;z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;background:var(--bg)">
-  <div style="width:44px;height:44px;border:3px solid var(--border2);border-top-color:#b8752a;border-radius:50%;animation:fbSpin .7s linear infinite"></div>
-  <div style="font-family:'DM Mono',monospace;font-size:12px;color:#9a968f;letter-spacing:.5px">กำลังโหลดข้อมูล…</div>
-</div>
-<style>@keyframes fbSpin{to{transform:rotate(360deg)}}</style>
-
 <div class="app">
 <div class="layout">
 
@@ -968,7 +922,6 @@ const LS_SALES_NAME = 'inv2_sales_name';
 
 // ── PERSISTENCE ──────────────────────────────────────────────────────────────
 function saveToStorage(){
-  window._lastLocalWrite = Date.now();
   if(typeof window._fbSaveStock === 'function') window._fbSaveStock(stockItems, locations);
   try{
     localStorage.setItem(LS_STOCK, JSON.stringify(stockItems));
@@ -1271,16 +1224,13 @@ document.getElementById('stkCsv').addEventListener('change',e=>{
       logEntries.push({name,type:'import',qty,note:'นำเข้าจาก CSV',location:loc,ts:nowFull(),epoch:Date.now()});
       added++;
     });
-    // Mark local write BEFORE saving so Firebase echo is ignored
-    window._lastLocalWrite = Date.now();
+    saveToStorage();
     logEntries.forEach(entry=>{
       stockLog.unshift(entry);
       if(typeof window._fbPushLog==='function') window._fbPushLog(entry);
     });
     if(stockLog.length>500) stockLog.length=500;
     try{ localStorage.setItem(LS_LOG, JSON.stringify(stockLog.slice(0,500))); }catch(e){}
-    // Save AFTER log is ready so Firebase gets complete data
-    saveToStorage();
     updateMetrics();
     notify(`📥 Import ${added} รายการสำเร็จ`);
   }});
@@ -1455,9 +1405,9 @@ function renderDashCharts(){
 }
 
 // ── SALES ─────────────────────────────────────────────────────────────────────
-function getSalePerson(d){const keys=Object.keys(d);const k=keys.find(k=>k.trim().toLowerCase().replace(/\s+/g,'')==='saleperson')||'sale person';return(d[k]||'').toString().trim()}
-function getATV(d){const keys=Object.keys(d);const k=keys.find(k=>k.trim().toLowerCase().includes('atv'))||'ATV (THB)';return cn(d[k])}
-function getProduct(d){const keys=Object.keys(d);const k=keys.find(k=>k.trim().toLowerCase().includes('product')||k.trim().toLowerCase().includes('item')||k.trim().toLowerCase()==='สินค้า');return k?(d[k]||'').toString().trim():''}
+function getSalePerson(d){const keys=Object.keys(d);const k=keys.find(k=>{const n=k.trim().toLowerCase().replace(/[\s_]+/g,'');return n==='saleperson'||n==='salesrep'||n==='rep'||n==='salesperson';});return k?(d[k]||'').toString().trim():''}
+function getATV(d){const keys=Object.keys(d);const k=keys.find(k=>{const n=k.trim().toLowerCase();return n.includes('atv')||n.includes('total_price')||n.includes('total price')||n==='total';})||'ATV (THB)';return cn(d[k])}
+function getProduct(d){const keys=Object.keys(d);const k=keys.find(k=>{const n=k.trim().toLowerCase();return n.includes('product')||n.includes('item_name')||n.includes('item')||n==='สินค้า'||n==='ชื่อสินค้า';});return k?(d[k]||'').toString().trim():''}
 function getQtySold(d){const keys=Object.keys(d);const k=keys.find(k=>k.trim().toLowerCase().includes('qty')||k.trim().toLowerCase().includes('quantity')||k.trim().toLowerCase().includes('จำนวน'));return k?cn(d[k]):1}
 function cn(v){return v?Number(v.toString().replace(/[^0-9.-]+/g,''))||0:0}
 
@@ -1646,7 +1596,6 @@ function renderRank(){
 function autoDeductStock(data){
   let deducted=0;const missed=new Set();
   const findMatch=n=>{n=n.toLowerCase();const exact=Object.keys(stockItems).find(k=>k.toLowerCase()===n);if(exact)return exact;return Object.keys(stockItems).find(k=>n.includes(k.toLowerCase())||k.toLowerCase().includes(n))||null};
-  const logEntries=[];
   data.forEach(row=>{
     const rawProd=getProduct(row);if(!rawProd)return;
     const parts=rawProd.split('+').map(p=>p.trim()).filter(Boolean);
@@ -1654,19 +1603,11 @@ function autoDeductStock(data){
     parts.forEach(part=>{
       const match=findMatch(part);
       if(match){
-        if(stockItems[match].qty>=qty){stockItems[match].qty-=qty;stockItems[match].soldQty=(stockItems[match].soldQty||0)+qty;logEntries.push({name:match,type:'out',qty,note:'หักจาก CSV ยอดขาย',location:stockItems[match].location||'',ts:nowFull(),epoch:Date.now()});deducted++}
-        else if(stockItems[match].qty>0){const left=stockItems[match].qty;stockItems[match].soldQty=(stockItems[match].soldQty||0)+left;logEntries.push({name:match,type:'out',qty:left,note:'หักจาก CSV (หมดสต็อก)',location:stockItems[match].location||'',ts:nowFull(),epoch:Date.now()});stockItems[match].qty=0;deducted++}
+        if(stockItems[match].qty>=qty){stockItems[match].qty-=qty;stockItems[match].soldQty=(stockItems[match].soldQty||0)+qty;addLog(match,'out',qty,'หักจาก CSV ยอดขาย');deducted++}
+        else if(stockItems[match].qty>0){const left=stockItems[match].qty;stockItems[match].soldQty=(stockItems[match].soldQty||0)+left;addLog(match,'out',left,'หักจาก CSV (หมดสต็อก)');stockItems[match].qty=0;deducted++}
       } else missed.add(part);
     });
   });
-  if(logEntries.length){
-    // Batch: push logs then save once
-    logEntries.forEach(entry=>{ stockLog.unshift(entry); if(typeof window._fbPushLog==='function') window._fbPushLog(entry); });
-    if(stockLog.length>500) stockLog.length=500;
-    window._lastLocalWrite = Date.now();
-    if(typeof window._fbSaveStock==='function') window._fbSaveStock(stockItems, locations);
-    try{ localStorage.setItem(LS_STOCK, JSON.stringify(stockItems)); localStorage.setItem(LS_LOG, JSON.stringify(stockLog.slice(0,500))); }catch(e){}
-  }
   if(deducted>0){notify(`🔄 หักสต็อกอัตโนมัติ ${deducted} รายการ`);updateMetrics()}
   if(missed.size>0) setTimeout(()=>notify(`⚠️ ไม่พบสต็อก: ${[...missed].slice(0,3).join(', ')}`,true),600);
 }
@@ -1713,7 +1654,6 @@ function destroyStockChartsAndEmpty(){
 
 function clearAllData(){
   if(!confirm('ล้างข้อมูลสต็อกและประวัติทั้งหมด?')) return;
-  window._lastLocalWrite = Date.now();
   stockItems={};stockLog=[];window.stockItems={};window.stockLog=[];
   try{if(typeof _db!=='undefined'){_db.ref('stockItems').remove();_db.ref('stockLog').remove();}}catch(e){}
   try{localStorage.removeItem(LS_STOCK);localStorage.removeItem(LS_LOG);}catch(e){}
@@ -1883,7 +1823,7 @@ function checkoutPOS(){
       salesperson: 'POS'
     });
   });
-  // addLog already calls _fbSaveStock, just save sales separately
+  if(typeof _fbSaveStock === 'function') _fbSaveStock(stockItems, locations);
   if(typeof _fbSaveSales === 'function') _fbSaveSales(rawSales);
   if(typeof update === 'function') update();
   if(typeof renderRank === 'function') renderRank();
