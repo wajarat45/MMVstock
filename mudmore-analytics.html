@@ -34,8 +34,8 @@
 
   window._fbSaveStock = function(si, loc){
     try{
-      // Record time of local write so listener can ignore the echo
-      window._lastLocalWrite = Date.now();
+      // บันทึกเวลา write เพื่อให้ listener skip echo ครั้งเดียว
+      window._lastWriteTime = Date.now();
       if(!si||!Object.keys(si).length) _db.ref('stockItems').remove();
       else _db.ref('stockItems').set(si);
       if(!loc||!Object.keys(loc).length) _db.ref('locations').remove();
@@ -63,19 +63,18 @@
 
   function safeRun(fn){ if(!isUserTyping()) fn(); else setTimeout(fn,1500); }
 
-  // Timestamp of last local write — ignore Firebase echoes within 3 seconds
-  window._lastLocalWrite = 0;
+  // Write ID: ทุกครั้งที่ write เราจะเก็บ ID ไว้ ถ้า listener ยิงกลับมาภายใน 2s ให้ skip
+  window._lastWriteId = null;
+  window._lastWriteTime = 0;
 
   window.addEventListener('load', function(){
     _db.ref('stockItems').on('value', snap=>{
       setFbStatus(true,'Firebase: เชื่อมต่อแล้ว');
       const val=snap.val()||{};
       const now = Date.now();
-      const incomingCount = Object.keys(val).length;
-      const localCount = Object.keys(stockItems).length;
-      // Skip echo if: within 3s of our own write (same or fewer SKUs = our echo, not new data)
-      // Allow through if: empty (clear op), or more SKUs (new data from another device)
-      if((now - window._lastLocalWrite) < 3000 && incomingCount > 0 && incomingCount <= localCount){
+      // Skip only if: เป็น echo จากการ write ของเราเอง (ภายใน 1.5s)
+      if((now - window._lastWriteTime) < 1500){
+        window._lastWriteTime = 0; // reset ทันทีหลัง skip ครั้งแรก
         return;
       }
       window.stockItems=val; stockItems=val;
@@ -597,8 +596,8 @@ body.dark .page-title span{color:#c88a43 !important;}
           <div class="chart-wrap h-220"><canvas id="topStockChart"></canvas><div class="empty-chart" id="emptyTopStock"><i class="ti ti-package"></i><span>ยังไม่มีสต็อก</span></div></div>
         </div>
         <div class="chart-panel">
-          <div class="chart-header"><div class="chart-title"><i class="ti ti-chart-pie"></i> สัดส่วนสต็อกตาม Location</div></div>
-          <div class="chart-wrap h-220"><canvas id="locPieChart"></canvas><div class="empty-chart" id="emptyLocPie"><i class="ti ti-map-pin"></i><span>ยังไม่มีข้อมูล Location</span></div></div>
+          <div class="chart-header"><div class="chart-title"><i class="ti ti-trophy"></i> Top 5 สินค้าขายดี</div></div>
+          <div class="chart-wrap h-220"><canvas id="dashBestChart"></canvas><div class="empty-chart" id="emptyDashBest"><i class="ti ti-trophy"></i><span>ยังไม่มีข้อมูลยอดขาย</span></div></div>
         </div>
       </div>
 
@@ -1387,13 +1386,19 @@ function renderDashCharts(){
     topStockChart=new Chart(topCanvas,{type:'bar',data:{labels:top5.map(([n])=>n),datasets:[{data:top5.map(([,i])=>i.qty),backgroundColor:PAL.slice(0,5),borderRadius:6}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{color:gridClr()},ticks:{color:tickClr(),font:{family:'DM Mono',size:11}}},y:{grid:{color:gridClr()},ticks:{color:tickClr(),font:{family:'DM Mono',size:11}}}}}});
   } else if(topEl) topEl.style.display='';
 
-  const locEl=document.getElementById('emptyLocPie');
-  const locCanvas=document.querySelector('#page-dashboard #locPieChart');
-  const locData=Object.entries(locations).map(([name])=>{const cnt=Object.values(stockItems).filter(i=>i.location===name).reduce((a,i)=>a+i.qty,0);return{name,cnt};}).filter(l=>l.cnt>0);
-  if(locData.length>0 && locCanvas){
+  // Top 5 Best Sellers chart
+  const locEl=document.getElementById('emptyDashBest');
+  const locCanvas=document.getElementById('dashBestChart');
+  const products={};
+  rawSales.forEach(d=>{
+    const prod=getProduct(d);if(!prod)return;
+    products[prod]=(products[prod]||0)+(getQtySold(d)||1);
+  });
+  const top5=Object.entries(products).sort((a,b)=>b[1]-a[1]).slice(0,5);
+  if(top5.length>0 && locCanvas){
     if(locEl) locEl.style.display='none';
     if(locPieChart) locPieChart.destroy();
-    locPieChart=new Chart(locCanvas,{type:'doughnut',data:{labels:locData.map(l=>l.name),datasets:[{data:locData.map(l=>l.cnt),backgroundColor:PAL,borderWidth:0,hoverOffset:8}]},options:{responsive:true,maintainAspectRatio:false,cutout:'65%',plugins:{legend:{position:'right',labels:{color:tickClr(),font:{family:'DM Mono',size:11},padding:12}}}}});
+    locPieChart=new Chart(locCanvas,{type:'bar',data:{labels:top5.map(([n])=>n),datasets:[{data:top5.map(([,v])=>v),backgroundColor:PAL.slice(0,5),borderRadius:8}]},options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',plugins:{legend:{display:false}},scales:{x:{grid:{color:gridClr()},ticks:{color:tickClr(),font:{family:'DM Mono',size:11}}},y:{grid:{color:gridClr()},ticks:{color:tickClr(),font:{family:'DM Mono',size:11}}}}}});
   } else if(locEl) locEl.style.display='';
 
   const mvEl=document.getElementById('emptyMovement');
@@ -1696,7 +1701,7 @@ function destroyStockChartsAndEmpty(){
 
 function clearAllData(){
   if(!confirm('ล้างข้อมูลสต็อกและประวัติทั้งหมด?')) return;
-  stockItems={};stockLog=[];window.stockItems={};window.stockLog=[];window._lastLocalWrite=0;
+  stockItems={};stockLog=[];window.stockItems={};window.stockLog=[];window._lastWriteTime=0;
   try{if(typeof _db!=='undefined'){_db.ref('stockItems').remove();_db.ref('stockLog').remove();}}catch(e){}
   try{localStorage.removeItem(LS_STOCK);localStorage.removeItem(LS_LOG);}catch(e){}
   destroyStockChartsAndEmpty();updateMetrics();renderTable();renderReportMovement();renderReportStock();updateDashboard();
