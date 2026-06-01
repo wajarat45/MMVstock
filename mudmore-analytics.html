@@ -416,21 +416,48 @@ body.dark .section-title,body.dark .chart-title{color:var(--text)}
 .rank-num{font-family:var(--font-mono);font-weight:600;font-size:13px;color:var(--text3)}
 .rank-1{color:var(--amber)}.rank-2{color:#6a7a8a}.rank-3{color:#8a6840}
 
-/* ═══ WARM PREMIUM GLASS ═══ */
+/* ═══ AG PREMIUM SOLARIZED GLASS (THEME AG) ═══ */
 :root{
-  --bg:#f4eadc;--bg2:rgba(255,250,242,.72);--bg3:rgba(245,234,218,.76);--surface:rgba(255,255,255,.38);--surface2:rgba(255,255,255,.58);--border:rgba(111,78,49,.14);--border2:rgba(111,78,49,.22);--text:#2c1b10;--text2:#6f5a48;--text3:#a58d77;--cyan:#8b5a2b;--green:#2f8f5b;--amber:#a86b2d;--red:#b64b36;--purple:#8f6f44;--orange:#c98242;--cyan-dim:rgba(139,90,43,.12);--green-dim:rgba(47,143,91,.12);--amber-dim:rgba(168,107,45,.13);--red-dim:rgba(182,75,54,.10);--purple-dim:rgba(143,111,68,.12);--radius:24px;--radius-sm:14px;--shadow-sm:0 10px 30px rgba(81,48,22,.07), inset 0 1px 0 rgba(255,255,255,.58);--shadow:0 18px 45px rgba(81,48,22,.10), inset 0 1px 0 rgba(255,255,255,.62);--shadow-md:0 26px 70px rgba(81,48,22,.16), inset 0 1px 0 rgba(255,255,255,.68);--glow-cyan:0 0 0 4px rgba(139,90,43,.16);--glow-green:0 0 0 4px rgba(47,143,91,.16);
+  --bg:#FDF6E3;
+  --bg2:rgba(253, 246, 227, 0.72);
+  --bg3:rgba(238, 232, 213, 0.76);
+  --surface:rgba(253, 246, 227, 0.38);
+  --surface2:rgba(238, 232, 213, 0.58);
+  --border:rgba(88, 110, 117, 0.14);
+  --border2:rgba(88, 110, 117, 0.22);
+  --text:#073642;
+  --text2:#586E75;
+  --text3:#93A1A1;
+  --cyan:#CB4B16;
+  --green:#859900;
+  --amber:#B58900;
+  --red:#DC322F;
+  --purple:#6C71C4;
+  --orange:#CB4B16;
+  --cyan-dim:rgba(203, 75, 22, 0.12);
+  --green-dim:rgba(133, 153, 0, 0.12);
+  --amber-dim:rgba(181, 137, 0, 0.13);
+  --red-dim:rgba(220, 50, 47, 0.10);
+  --purple-dim:rgba(108, 113, 196, 0.12);
+  --radius:24px;
+  --radius-sm:14px;
+  --shadow-sm:0 10px 30px rgba(88, 110, 117, 0.08), inset 0 1px 0 rgba(255,255,255,.68);
+  --shadow:0 18px 45px rgba(88, 110, 117, 0.12), inset 0 1px 0 rgba(255,255,255,.72);
+  --shadow-md:0 26px 70px rgba(88, 110, 117, 0.18), inset 0 1px 0 rgba(255,255,255,.78);
+  --glow-cyan:0 0 0 4px rgba(203, 75, 22, 0.18);
+  --glow-green:0 0 0 4px rgba(133, 153, 0, 0.18);
 }
-body{background:radial-gradient(circle at 8% 8%, rgba(255,255,255,.78) 0 16%, transparent 36%),radial-gradient(circle at 88% 16%, rgba(205,158,94,.34) 0 14%, transparent 34%),radial-gradient(circle at 82% 92%, rgba(248,220,181,.58) 0 16%, transparent 36%),linear-gradient(135deg,#f7efe4 0%,#ecd9bf 48%,#f8efe2 100%);}
-body::before{background:radial-gradient(ellipse 70% 60% at 18% 8%, rgba(255,255,255,.52) 0%, transparent 58%),radial-gradient(ellipse 50% 44% at 72% 20%, rgba(174,111,46,.14) 0%, transparent 62%),radial-gradient(ellipse 60% 50% at 84% 90%, rgba(255,206,133,.20) 0%, transparent 62%);}
+body{background:radial-gradient(circle at 8% 8%, rgba(255,255,255,.85) 0 16%, transparent 36%),radial-gradient(circle at 88% 16%, rgba(203,75,22,.08) 0 14%, transparent 34%),radial-gradient(circle at 82% 92%, rgba(238,232,213,.58) 0 16%, transparent 36%),linear-gradient(135deg,#FDF6E3 0%,#EEE8D5 48%,#FDF6E3 100%);}
+body::before{background:radial-gradient(ellipse 70% 60% at 18% 8%, rgba(255,255,255,.62) 0%, transparent 58%),radial-gradient(ellipse 50% 44% at 72% 20%, rgba(203,75,22,.06) 0%, transparent 62%),radial-gradient(ellipse 60% 50% at 84% 90%, rgba(238,232,213,.25) 0%, transparent 62%);}
 body::after{content:'';display:block;position:fixed;inset:0;pointer-events:none;z-index:0;background-image:linear-gradient(rgba(255,255,255,.18) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.14) 1px,transparent 1px);background-size:44px 44px;opacity:.28;mask-image:linear-gradient(to bottom,rgba(0,0,0,.55),transparent 75%);}
 .app{max-width:1480px;padding:18px;}.layout{grid-template-columns:250px 1fr;gap:18px;min-height:calc(100vh - 36px)}
 .sidebar,.main,.metric-card,.panel,.chart-panel,.modal,.topbar,.theme-toggle,.form-input,.btn-ghost,.notif-item{backdrop-filter:blur(24px) saturate(1.28);-webkit-backdrop-filter:blur(24px) saturate(1.28);}
-.sidebar{background:linear-gradient(160deg,rgba(255,255,255,.68),rgba(255,244,228,.45));border:1px solid rgba(255,255,255,.70);border-radius:28px;box-shadow:var(--shadow-md);overflow:hidden;}
-.main{background:linear-gradient(145deg,rgba(255,250,242,.62),rgba(255,244,231,.36));border:1px solid rgba(255,255,255,.70);border-radius:28px;box-shadow:var(--shadow-md);}
-.logo{padding:24px 22px 22px;border-bottom:1px solid rgba(111,78,49,.10)}
-.logo-text{font-size:25px;color:#3a2314;line-height:.96;}
-.logo-text::before{content:'M';display:inline-flex;align-items:center;justify-content:center;width:38px;height:38px;margin-right:10px;border-radius:12px;background:linear-gradient(135deg,#6f411d,#d5a15d);color:#fff;font-family:var(--font);font-weight:800;box-shadow:0 12px 28px rgba(111,65,29,.22)}
-.logo-text span{color:#8b5a2b}.logo-sub{color:#7d6a58;letter-spacing:1.6px}
+.sidebar{background:linear-gradient(160deg,rgba(253,246,227,.80),rgba(238,232,213,.60));border:1px solid rgba(255,255,255,.70);border-radius:28px;box-shadow:var(--shadow-md);overflow:hidden;}
+.main{background:linear-gradient(145deg,rgba(253,246,227,.75),rgba(238,232,213,.50));border:1px solid rgba(255,255,255,.70);border-radius:28px;box-shadow:var(--shadow-md);}
+.logo{padding:24px 22px 22px;border-bottom:1px solid rgba(88,110,117,.10)}
+.logo-text{font-size:25px;color:#073642;line-height:.96;}
+.logo-text::before{content:'AG';display:inline-flex;align-items:center;justify-content:center;width:38px;height:38px;margin-right:10px;border-radius:12px;background:linear-gradient(135deg,#586e75,#cb4b16);color:#fff;font-family:var(--font);font-weight:800;box-shadow:0 12px 28px rgba(203,75,22,.22)}
+.logo-text span{color:#CB4B16}.logo-sub{color:#586E75;letter-spacing:1.6px}
 .nav{padding:16px 12px}.nav-section{color:#6f5a48;font-size:10px;padding:0 12px 8px;margin-top:18px;font-weight:700}
 .nav-item{margin:3px 0;padding:12px 13px;border-left:none;border-radius:16px;color:#735d4a;font-weight:600}
 .nav-item:hover{background:rgba(255,255,255,.46);color:#3a2314;transform:translateX(2px)}
@@ -495,10 +522,10 @@ body.dark #d-hero-sales{color:#fff !important;}
 
 /* Topbar fixes */
 .topbar{position:sticky;top:0;z-index:999;backdrop-filter:blur(18px);}
-body:not(.dark) .topbar{background:linear-gradient(135deg, rgba(255,255,255,.88), rgba(250,238,220,.78)) !important;border:1px solid rgba(132,91,48,.12) !important;border-bottom:1px solid rgba(176,116,42,.18) !important;box-shadow:0 16px 38px rgba(126,84,36,.10),inset 0 1px 0 rgba(255,255,255,.85) !important;}
-body:not(.dark) .page-title{color: #2b2119 !important;}
-body:not(.dark) .page-title span{color: #b46f20 !important;}
-body:not(.dark){--cyan:#b8752a;--cyan-dim:rgba(184,117,42,.10);--glow-cyan:0 0 0 3px rgba(184,117,42,.13);}
+body:not(.dark) .topbar{background:linear-gradient(135deg, rgba(253,246,227,.90), rgba(238,232,213,.80)) !important;border:1px solid rgba(88,110,117,.16) !important;border-bottom:1px solid rgba(203,75,22,.20) !important;box-shadow:0 16px 38px rgba(88,110,117,.10),inset 0 1px 0 rgba(255,255,255,.90) !important;}
+body:not(.dark) .page-title{color: #073642 !important;}
+body:not(.dark) .page-title span{color: #CB4B16 !important;}
+body:not(.dark){--cyan:#CB4B16;--cyan-dim:rgba(203,75,22,.12);--glow-cyan:0 0 0 4px rgba(203,75,22,.18);}
 body.dark .topbar{background:linear-gradient(135deg, rgba(13,14,16,.98), rgba(34,35,36,.94)) !important;border:1px solid rgba(255,255,255,.08) !important;border-bottom:1px solid rgba(212,166,98,.20) !important;}
 body.dark .page-title{color:#f4efe7 !important;}
 body.dark .page-title span{color:#c88a43 !important;}
@@ -1427,17 +1454,40 @@ function handleSalesUpload(file){
   const shortName = file.name.length>20 ? file.name.slice(0,18)+'…' : file.name;
   const prevCount = rawSales.length;
   Papa.parse(file,{header:true,skipEmptyLines:true,complete:r=>{
-    rawSales = [...rawSales, ...r.data];
+    // กรองข้อมูลซ้ำ: นำเข้าเฉพาะรายการที่ไม่มีใน rawSales เดิม
+    const uniqueNewData = [];
+    let dupCount = 0;
+    r.data.forEach(newRow => {
+      const isDup = rawSales.some(existingRow => {
+        return Object.keys(newRow).every(k => String(newRow[k]).trim() === String(existingRow[k]).trim());
+      });
+      if (!isDup) {
+        uniqueNewData.push(newRow);
+      } else {
+        dupCount++;
+      }
+    });
+
+    if (uniqueNewData.length === 0) {
+      notify(`⚠️ ข้ามการนำเข้า: ข้อมูลทั้งหมดในไฟล์ซ้ำกับที่มีอยู่แล้ว`, true);
+      return;
+    }
+
+    rawSales = [...rawSales, ...uniqueNewData];
     let namesList = [];
     try{ namesList = JSON.parse(localStorage.getItem(LS_SALES_NAME)||'[]'); }catch(e){ namesList=[]; }
     if(!Array.isArray(namesList)) namesList = namesList ? [namesList] : [];
     if(!namesList.includes(shortName)) namesList.push(shortName);
     localStorage.setItem(LS_SALES_NAME, JSON.stringify(namesList));
     saveSalesToStorage();
-    initFilter(); update(); autoDeductStock(r.data); updatePricesFromSales(r.data); renderRank();
+    initFilter(); update(); autoDeductStock(uniqueNewData); updatePricesFromSales(uniqueNewData); renderRank();
     setSalesSavedUI(true); updateSalesLabel(); updateDashboard();
     const added = rawSales.length - prevCount;
-    notify(`✅ เพิ่ม ${added} รายการ — รวม ${rawSales.length} รายการ`);
+    if (dupCount > 0) {
+      notify(`✅ เพิ่ม ${added} รายการ (ข้ามรายการซ้ำ ${dupCount} รายการ)`);
+    } else {
+      notify(`✅ เพิ่ม ${added} รายการ — รวม ${rawSales.length} รายการ`);
+    }
   }});
 }
 
@@ -1582,10 +1632,25 @@ function renderRank(){
   const rankCanvas=document.getElementById('rankChart');const emptyRank=document.getElementById('emptyRank');
   if(!rawSales.length){if(emptyRank)emptyRank.style.display='';if(rankCanvas)rankCanvas.style.display='none';return}
   const products={};
+  const findMatch=n=>{n=n.toLowerCase();const exact=Object.keys(stockItems).find(k=>k.toLowerCase()===n);if(exact)return exact;return Object.keys(stockItems).find(k=>n.includes(k.toLowerCase())||k.toLowerCase().includes(n))||null};
   rawSales.forEach(d=>{
     const prod=getProduct(d);if(!prod)return;
-    const parts=prod.split('+').map(p=>p.trim()).filter(Boolean);
-    parts.forEach(p=>{if(!products[p])products[p]={qty:0,sales:0};products[p].qty+=getQtySold(d)||1;products[p].sales+=getATV(d);});
+    // ค้นหาแบบเต็มชื่อก่อน (เผื่อชื่อสินค้ามีเครื่องหมาย + ในตัวอยู่แล้ว)
+    const wholeMatch = findMatch(prod);
+    if(wholeMatch){
+      if(!products[wholeMatch])products[wholeMatch]={qty:0,sales:0};
+      products[wholeMatch].qty+=getQtySold(d)||1;
+      products[wholeMatch].sales+=getATV(d);
+    } else {
+      // หากไม่มีสินค้าชื่อเต็มในสต็อก จึงจะแยกวิเคราะห์ส่วนประกอบเดี่ยวด้วยเครื่องหมาย +
+      const parts=prod.split('+').map(p=>p.trim()).filter(Boolean);
+      parts.forEach(p=>{
+        const match=findMatch(p) || p;
+        if(!products[match])products[match]={qty:0,sales:0};
+        products[match].qty+=getQtySold(d)||1;
+        products[match].sales+=getATV(d);
+      });
+    }
   });
   const totalSales=Object.values(products).reduce((a,p)=>a+p.sales,0);
   const sorted=Object.entries(products).sort((a,b)=>b[1].qty-a[1].qty);
@@ -1609,15 +1674,35 @@ function autoDeductStock(data){
   const findMatch=n=>{n=n.toLowerCase();const exact=Object.keys(stockItems).find(k=>k.toLowerCase()===n);if(exact)return exact;return Object.keys(stockItems).find(k=>n.includes(k.toLowerCase())||k.toLowerCase().includes(n))||null};
   data.forEach(row=>{
     const rawProd=getProduct(row);if(!rawProd)return;
-    const parts=rawProd.split('+').map(p=>p.trim()).filter(Boolean);
     const qty=getQtySold(row)||1;
-    parts.forEach(part=>{
-      const match=findMatch(part);
-      if(match){
-        if(stockItems[match].qty>=qty){stockItems[match].qty-=qty;stockItems[match].soldQty=(stockItems[match].soldQty||0)+qty;addLog(match,'out',qty,'หักจาก CSV ยอดขาย');deducted++}
-        else if(stockItems[match].qty>0){const left=stockItems[match].qty;stockItems[match].soldQty=(stockItems[match].soldQty||0)+left;addLog(match,'out',left,'หักจาก CSV (หมดสต็อก)');stockItems[match].qty=0;deducted++}
-      } else missed.add(part);
-    });
+    
+    // ค้นหาแบบเต็มชื่อก่อน (เผื่อชื่อสินค้ามีเครื่องหมาย + ในตัวอยู่แล้ว)
+    const wholeMatch = findMatch(rawProd);
+    if(wholeMatch){
+      if(stockItems[wholeMatch].qty>=qty){
+        stockItems[wholeMatch].qty-=qty;
+        stockItems[wholeMatch].soldQty=(stockItems[wholeMatch].soldQty||0)+qty;
+        addLog(wholeMatch,'out',qty,'หักจาก CSV ยอดขาย');
+        deducted++;
+      }
+      else if(stockItems[wholeMatch].qty>0){
+        const left=stockItems[wholeMatch].qty;
+        stockItems[wholeMatch].soldQty=(stockItems[wholeMatch].soldQty||0)+left;
+        addLog(wholeMatch,'out',left,'หักจาก CSV (หมดสต็อก)');
+        stockItems[wholeMatch].qty=0;
+        deducted++;
+      }
+    } else {
+      // หากไม่มีสินค้าชื่อเต็มในสต็อก จึงจะแยกวิเคราะห์ส่วนประกอบเดี่ยวด้วยเครื่องหมาย +
+      const parts=rawProd.split('+').map(p=>p.trim()).filter(Boolean);
+      parts.forEach(part=>{
+        const match=findMatch(part);
+        if(match){
+          if(stockItems[match].qty>=qty){stockItems[match].qty-=qty;stockItems[match].soldQty=(stockItems[match].soldQty||0)+qty;addLog(match,'out',qty,'หักจาก CSV ยอดขาย');deducted++}
+          else if(stockItems[match].qty>0){const left=stockItems[match].qty;stockItems[match].soldQty=(stockItems[match].soldQty||0)+left;addLog(match,'out',left,'หักจาก CSV (หมดสต็อก)');stockItems[match].qty=0;deducted++}
+        } else missed.add(part);
+      });
+    }
   });
   if(deducted>0){notify(`🔄 หักสต็อกอัตโนมัติ ${deducted} รายการ`);updateMetrics()}
   if(missed.size>0) setTimeout(()=>notify(`⚠️ ไม่พบสต็อก: ${[...missed].slice(0,3).join(', ')}`,true),600);
@@ -1727,7 +1812,7 @@ function clearSalesData(){
 function toggleTheme(){
   const isDark=document.body.classList.toggle('dark');
   document.getElementById('themeIcon').className=isDark?'ti ti-sun':'ti ti-moon';
-  document.getElementById('themeLabel').textContent=isDark?'โหมดสว่าง':'โหมดมืด';
+  document.getElementById('themeLabel').textContent=isDark?'โหมด AG':'โหมดมืด';
   localStorage.setItem(LS_THEME,isDark?'dark':'light');
   updateDashboard();renderRank();
   if(document.getElementById('page-sales').classList.contains('active')) update();
@@ -1891,7 +1976,11 @@ function checkoutPOS(){
   if(savedTheme!=='light'){
     document.body.classList.add('dark');
     document.getElementById('themeIcon').className='ti ti-sun';
-    document.getElementById('themeLabel').textContent='โหมดสว่าง';
+    document.getElementById('themeLabel').textContent='โหมด AG';
+  } else {
+    document.body.classList.remove('dark');
+    document.getElementById('themeIcon').className='ti ti-moon';
+    document.getElementById('themeLabel').textContent='โหมดมืด';
   }
   if(Object.keys(stockItems).length>0){
     updateMetrics();renderReportMovement();
