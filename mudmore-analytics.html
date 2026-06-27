@@ -1446,7 +1446,7 @@ function renderDashCharts(){
 function getSalePerson(d){const keys=Object.keys(d);const k=keys.find(k=>{const n=k.trim().toLowerCase().replace(/[\s_]+/g,'');return n==='saleperson'||n==='salesrep'||n==='rep'||n==='salesperson';});return k?(d[k]||'').toString().trim():''}
 function getATV(d){const keys=Object.keys(d);const k=keys.find(k=>{const n=k.trim().toLowerCase();return n.includes('atv')||n.includes('total_price')||n.includes('total price')||n==='total';})||'ATV (THB)';return cn(d[k])}
 function getProduct(d){const keys=Object.keys(d);const k=keys.find(k=>{const n=k.trim().toLowerCase();return n.includes('product')||n.includes('item_name')||n.includes('item')||n==='สินค้า'||n==='ชื่อสินค้า';});return k?(d[k]||'').toString().trim():''}
-function getQtySold(d){const keys=Object.keys(d);const k=keys.find(k=>k.trim().toLowerCase().includes('qty')||k.trim().toLowerCase().includes('quantity')||k.trim().toLowerCase().includes('จำนวน'));return k?cn(d[k]):1}
+function getQtySold(d){const keys=Object.keys(d);const k=keys.find(k=>{const n=k.trim().toLowerCase();return n.includes('qty')||n.includes('quantity')||n.includes('จำนวน')||n==='pcs'||n==='pieces'||n==='จำนวนชิ้น';});return k?cn(d[k]):1}
 function cn(v){return v?Number(v.toString().replace(/[^0-9.-]+/g,''))||0:0}
 
 function handleSalesUpload(file){
