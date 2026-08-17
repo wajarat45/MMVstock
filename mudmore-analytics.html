@@ -72,9 +72,8 @@
       setFbStatus(true,'Firebase: เชื่อมต่อแล้ว');
       const val=snap.val()||{};
       const now = Date.now();
-      // Skip only if: เป็น echo จากการ write ของเราเอง (ภายใน 1.5s)
-      if((now - window._lastWriteTime) < 1500){
-        window._lastWriteTime = 0; // reset ทันทีหลัง skip ครั้งแรก
+      // Skip echo จากการ write ของเราเอง (ภายใน 5s) — ไม่ reset เพื่อบล็อก echo หลายครั้ง
+      if((now - window._lastWriteTime) < 5000){
         return;
       }
       window.stockItems=val; stockItems=val;
