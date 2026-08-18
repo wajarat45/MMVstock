@@ -186,7 +186,7 @@ body::after{display:none}
 .sidebar{background:var(--bg2);border-right:1px solid var(--border);padding:20px 0;position:sticky;top:20px;height:fit-content;border-radius:var(--radius) 0 0 var(--radius);box-shadow:var(--shadow-sm);}
 .logo{padding:0 18px 20px;border-bottom:1px solid var(--border)}
 .logo-text{font-family:var(--font-display);font-size:20px;font-weight:400;color:var(--text);letter-spacing:-0.3px;line-height:1}
-.logo-text span{color:var(--cyan);font-style:italic}
+.logo-text span{color:var(--cyan);font-style:italic;font-size:16px;display:block;margin-top:2px}
 .logo-sub{font-size:10px;color:var(--text3);font-family:var(--font-mono);margin-top:5px;letter-spacing:.3px}
 .nav{padding:12px 0}
 .nav-section{font-size:9px;color:var(--text3);letter-spacing:1.2px;text-transform:uppercase;font-family:var(--font-mono);padding:0 18px 6px;margin-top:14px;font-weight:500}
@@ -461,8 +461,8 @@ body::after{display:none;}
 .sidebar{background:linear-gradient(160deg,rgba(253,246,227,.80),rgba(238,232,213,.60));border:1px solid rgba(255,255,255,.70);border-radius:28px;box-shadow:var(--shadow-md);overflow:hidden;}
 .main{background:linear-gradient(145deg,rgba(253,246,227,.75),rgba(238,232,213,.50));border:1px solid rgba(255,255,255,.70);border-radius:28px;box-shadow:var(--shadow-md);}
 .logo{padding:24px 22px 22px;border-bottom:1px solid rgba(88,110,117,.10)}
-.logo-text{font-size:25px;color:#073642;line-height:.96;}
-.logo-text::before{content:'MMV';display:inline-flex;align-items:center;justify-content:center;width:38px;height:38px;margin-right:10px;border-radius:12px;background:linear-gradient(135deg,#586e75,#cb4b16);color:#fff;font-family:var(--font);font-weight:800;box-shadow:0 12px 28px rgba(203,75,22,.22)}
+.logo-text{font-size:26px;font-weight:700;color:#073642;line-height:1;font-family:var(--font);}
+.logo-text::before{display:none;}
 .logo-text span{color:#CB4B16}.logo-sub{color:#586E75;letter-spacing:1.6px}
 .nav{padding:16px 12px}.nav-section{color:#6f5a48;font-size:10px;padding:0 12px 8px;margin-top:18px;font-weight:700}
 .nav-item{margin:3px 0;padding:12px 13px;border-left:none;border-radius:16px;color:#735d4a;font-weight:600}
@@ -556,7 +556,7 @@ body.dark .page-title span{color:#c88a43 !important;}
 <!-- ── Sidebar ── -->
 <aside class="sidebar">
   <div class="logo">
-    <div class="logo-text">MMV <span>Dashboard</span></div>
+    <div class="logo-text">MMV<br><span>Dashboard</span></div>
     <div class="logo-sub">MANAGEMENT SYSTEM</div>
   </div>
   <nav class="nav">
