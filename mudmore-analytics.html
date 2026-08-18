@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Inventory Management System</title>
+<title>MMV Dashboard</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=DM+Mono:wght@400;500&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
@@ -446,16 +446,23 @@ body.dark .section-title,body.dark .chart-title{color:var(--text)}
   --glow-cyan:0 0 0 4px rgba(203, 75, 22, 0.18);
   --glow-green:0 0 0 4px rgba(133, 153, 0, 0.18);
 }
-body{background:radial-gradient(circle at 8% 8%, rgba(255,255,255,.85) 0 16%, transparent 36%),radial-gradient(circle at 88% 16%, rgba(203,75,22,.08) 0 14%, transparent 34%),radial-gradient(circle at 82% 92%, rgba(238,232,213,.58) 0 16%, transparent 36%),linear-gradient(135deg,#FDF6E3 0%,#EEE8D5 48%,#FDF6E3 100%);}
-body::before{background:radial-gradient(ellipse 70% 60% at 18% 8%, rgba(255,255,255,.62) 0%, transparent 58%),radial-gradient(ellipse 50% 44% at 72% 20%, rgba(203,75,22,.06) 0%, transparent 62%),radial-gradient(ellipse 60% 50% at 84% 90%, rgba(238,232,213,.25) 0%, transparent 62%);}
-body::after{content:'';display:block;position:fixed;inset:0;pointer-events:none;z-index:0;background-image:linear-gradient(rgba(255,255,255,.18) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.14) 1px,transparent 1px);background-size:44px 44px;opacity:.28;mask-image:linear-gradient(to bottom,rgba(0,0,0,.55),transparent 75%);}
-.app{max-width:1480px;padding:18px;}.layout{grid-template-columns:250px 1fr;gap:18px;min-height:calc(100vh - 36px)}
+body{background-color:#faf8f2;}
+body::before{display:none;}
+body::after{display:none;}
+
+/* Champagne Glass Aura Background */
+.aura-bg{position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none;}
+.aura-layer-1{position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,251,235,0.95) 0%,rgba(254,243,199,0.62) 50%,rgba(253,230,138,0.34) 100%);mix-blend-mode:normal;transform:translateZ(0);will-change:transform;}
+.aura-layer-2{position:absolute;inset:0;background:radial-gradient(ellipse 50% 45% at 32% 42%,rgba(251,191,36,0.26) 0%,transparent 68%);mix-blend-mode:multiply;filter:blur(180px);transform:translateZ(0);will-change:transform;}
+.aura-layer-3{position:absolute;inset:0;background:radial-gradient(ellipse 42% 50% at 72% 60%,rgba(245,158,11,0.20) 0%,transparent 70%);mix-blend-mode:multiply;filter:blur(198px);transform:translateZ(0);will-change:transform;}
+.aura-layer-4{position:absolute;inset:0;background:linear-gradient(120deg,rgba(255,255,255,0.65),transparent 42%,rgba(255,255,255,0.30) 72%);mix-blend-mode:multiply;filter:blur(65px);transform:translateZ(0);will-change:transform;}
+.app{max-width:1480px;padding:18px;position:relative;z-index:1;}.layout{grid-template-columns:250px 1fr;gap:18px;min-height:calc(100vh - 36px)}
 .sidebar,.main,.metric-card,.panel,.chart-panel,.modal,.topbar,.theme-toggle,.form-input,.btn-ghost,.notif-item{backdrop-filter:blur(24px) saturate(1.28);-webkit-backdrop-filter:blur(24px) saturate(1.28);}
 .sidebar{background:linear-gradient(160deg,rgba(253,246,227,.80),rgba(238,232,213,.60));border:1px solid rgba(255,255,255,.70);border-radius:28px;box-shadow:var(--shadow-md);overflow:hidden;}
 .main{background:linear-gradient(145deg,rgba(253,246,227,.75),rgba(238,232,213,.50));border:1px solid rgba(255,255,255,.70);border-radius:28px;box-shadow:var(--shadow-md);}
 .logo{padding:24px 22px 22px;border-bottom:1px solid rgba(88,110,117,.10)}
 .logo-text{font-size:25px;color:#073642;line-height:.96;}
-.logo-text::before{content:'AG';display:inline-flex;align-items:center;justify-content:center;width:38px;height:38px;margin-right:10px;border-radius:12px;background:linear-gradient(135deg,#586e75,#cb4b16);color:#fff;font-family:var(--font);font-weight:800;box-shadow:0 12px 28px rgba(203,75,22,.22)}
+.logo-text::before{content:'MMV';display:inline-flex;align-items:center;justify-content:center;width:38px;height:38px;margin-right:10px;border-radius:12px;background:linear-gradient(135deg,#586e75,#cb4b16);color:#fff;font-family:var(--font);font-weight:800;box-shadow:0 12px 28px rgba(203,75,22,.22)}
 .logo-text span{color:#CB4B16}.logo-sub{color:#586E75;letter-spacing:1.6px}
 .nav{padding:16px 12px}.nav-section{color:#6f5a48;font-size:10px;padding:0 12px 8px;margin-top:18px;font-weight:700}
 .nav-item{margin:3px 0;padding:12px 13px;border-left:none;border-radius:16px;color:#735d4a;font-weight:600}
@@ -483,14 +490,14 @@ thead th{background:rgba(111,78,49,.07);color:#7d654f;border-bottom:1px solid rg
 #d-hero-sales{font-size:52px!important}
 
 /* Dark graphite */
-body.dark{--bg:#070809;--bg2:rgba(18,19,21,.78);--bg3:rgba(28,29,32,.86);--surface:rgba(255,255,255,.045);--surface2:rgba(255,255,255,.075);--border:rgba(255,255,255,.10);--border2:rgba(255,255,255,.18);--text:#f4f4f5;--text2:#c7c9ce;--text3:#858a93;--cyan:#f0b85a;--green:#62d889;--amber:#f0b85a;--red:#ff7668;--purple:#8c7cf6;--orange:#f59f55;--cyan-dim:rgba(240,184,90,.14);--green-dim:rgba(98,216,137,.12);--amber-dim:rgba(240,184,90,.14);--red-dim:rgba(255,118,104,.11);--purple-dim:rgba(140,124,246,.12);background:radial-gradient(circle at 12% 8%,rgba(255,255,255,.055),transparent 26%),radial-gradient(circle at 84% 16%,rgba(240,184,90,.09),transparent 28%),radial-gradient(circle at 78% 92%,rgba(80,80,84,.16),transparent 34%),linear-gradient(135deg,#050607 0%,#111214 46%,#070809 100%) !important;}
-body.dark::before{background:radial-gradient(ellipse 64% 46% at 12% 0%,rgba(255,255,255,.045) 0%,transparent 58%),radial-gradient(ellipse 46% 38% at 84% 18%,rgba(240,184,90,.10) 0%,transparent 64%),radial-gradient(ellipse 60% 50% at 76% 94%,rgba(120,120,128,.10) 0%,transparent 64%) !important;}
+body.dark{--bg:#070809;--bg2:rgba(18,19,21,.78);--bg3:rgba(28,29,32,.86);--surface:rgba(255,255,255,.045);--surface2:rgba(255,255,255,.075);--border:rgba(255,255,255,.10);--border2:rgba(255,255,255,.18);--text:#f4f4f5;--text2:#c7c9ce;--text3:#858a93;--cyan:#f0b85a;--green:#62d889;--amber:#f0b85a;--red:#ff7668;--purple:#8c7cf6;--orange:#f59f55;--cyan-dim:rgba(240,184,90,.14);--green-dim:rgba(98,216,137,.12);--amber-dim:rgba(240,184,90,.14);--red-dim:rgba(255,118,104,.11);--purple-dim:rgba(140,124,246,.12);background-color:#070809 !important;}
+body.dark .aura-bg{display:none;}
 body.dark .sidebar,body.dark .main,body.dark .metric-card,body.dark .panel,body.dark .chart-panel,body.dark .modal{background:linear-gradient(145deg,rgba(28,29,32,.72),rgba(12,13,15,.62)) !important;border-color:rgba(255,255,255,.105) !important;box-shadow:0 24px 72px rgba(0,0,0,.42),inset 0 1px 0 rgba(255,255,255,.08) !important;}
 body.dark .topbar{background:rgba(13,14,16,.52) !important;border-bottom-color:rgba(255,255,255,.09) !important;}
 body.dark .page-title,body.dark .section-title,body.dark .chart-title,body.dark .td-name{color:#f7f7f8 !important;}
 body.dark .page-title span,body.dark .logo-text span,body.dark .chart-title i,body.dark .section-title i,body.dark .nav-item.active i{color:#f0b85a !important;}
 body.dark .logo-text{color:#f7f7f8 !important;}
-body.dark .logo-text::before{background:linear-gradient(135deg,#2b2d31,#f0b85a) !important;color:#08090a !important;}
+body.dark .logo-text::before{background:linear-gradient(135deg,#2b2d31,#f0b85a) !important;color:#08090a !important;font-size:11px !important;}
 body.dark .nav-item{color:#c7c9ce !important;}
 body.dark .nav-item:hover{background:rgba(255,255,255,.055) !important;color:#ffffff !important;}
 body.dark .nav-item.active{background:linear-gradient(135deg,rgba(240,184,90,.18),rgba(255,255,255,.055)) !important;color:#ffd992 !important;}
@@ -540,15 +547,16 @@ body.dark .page-title span{color:#c88a43 !important;}
 </style>
 </head>
 <body>
+<div class="aura-bg" aria-hidden="true"><div class="aura-layer-1"></div><div class="aura-layer-2"></div><div class="aura-layer-3"></div><div class="aura-layer-4"></div></div>
 <div class="notif-stack" id="notifStack"></div>
 
-<div class="app">
+<div class="app" style="position:relative;z-index:1">
 <div class="layout">
 
 <!-- ── Sidebar ── -->
 <aside class="sidebar">
   <div class="logo">
-    <div class="logo-text">Invent<span>ory</span></div>
+    <div class="logo-text">MMV <span>Dashboard</span></div>
     <div class="logo-sub">MANAGEMENT SYSTEM</div>
   </div>
   <nav class="nav">
@@ -614,7 +622,7 @@ body.dark .page-title span{color:#c88a43 !important;}
 
       <div class="chart-grid">
         <div class="chart-panel full">
-          <div class="chart-header"><div class="chart-title"><i class="ti ti-chart-line"></i> การเคลื่อนไหวสต็อก (30 วันล่าสุด)</div></div>
+          <div class="chart-header"><div class="chart-title"><i class="ti ti-chart-line"></i> ยอดขายรายวัน (จาก CSV ยอดขาย)</div></div>
           <div class="chart-wrap h-260"><canvas id="movementChart"></canvas><div class="empty-chart" id="emptyMovement"><i class="ti ti-chart-line"></i><span>ยังไม่มีข้อมูลการเคลื่อนไหว</span></div></div>
         </div>
         <div class="chart-panel">
@@ -1432,15 +1440,61 @@ function renderDashCharts(){
 
   const mvEl=document.getElementById('emptyMovement');
   const mvCanvas=document.querySelector('#page-dashboard #movementChart');
-  const mvLogs=stockLog.filter(l=>l.type==='in'||l.type==='out');
-  if(mvLogs.length>0 && mvCanvas){
+
+  // ดึงข้อมูลยอดขายตามวันที่จาก rawSales (CSV ยอดขาย)
+  const salesByDate={};
+  const dateKey2=Object.keys(rawSales[0]||{}).find(k=>k.toLowerCase().includes('date')||k.toLowerCase()==='วันที่');
+  if(rawSales.length && dateKey2){
+    rawSales.forEach(d=>{
+      const dt=parseThaiDate(d[dateKey2]);
+      if(!dt) return;
+      const key=`${dt.getDate()}/${dt.getMonth()+1}`;
+      if(!salesByDate[key]) salesByDate[key]={qty:0,sales:0};
+      salesByDate[key].qty += getQtySold(d)||1;
+      salesByDate[key].sales += getATV(d);
+    });
+  }
+
+  // ถ้ามีข้อมูลยอดขาย ใช้ยอดขาย ถ้าไม่มีใช้ stockLog
+  const hasSalesData = Object.keys(salesByDate).length > 0;
+
+  if(hasSalesData && mvCanvas){
     if(mvEl) mvEl.style.display='none';
-    const days={};
-    mvLogs.forEach(l=>{const d=l.ts?l.ts.split(' ')[0]:'?';if(!days[d])days[d]={in:0,out:0};if(l.type==='in')days[d].in+=l.qty;else days[d].out+=l.qty;});
-    const labels=Object.keys(days).slice(0,14);
+    // เรียงวันที่จากน้อยไปมาก
+    const sortedDates = Object.keys(salesByDate).sort((a,b)=>{
+      const [da,ma]=a.split('/').map(Number);
+      const [db,mb]=b.split('/').map(Number);
+      return (ma*100+da)-(mb*100+db);
+    });
+    const labels=sortedDates.slice(-30);
     if(movChart) movChart.destroy();
-    movChart=new Chart(mvCanvas,{type:'line',data:{labels,datasets:[{label:'รับเข้า',data:labels.map(d=>days[d].in),borderColor:'#00e5a0',backgroundColor:'rgba(0,229,160,0.1)',fill:true,tension:.4,pointRadius:3},{label:'จ่ายออก',data:labels.map(d=>days[d].out),borderColor:'#ff5757',backgroundColor:'rgba(255,87,87,0.08)',fill:true,tension:.4,pointRadius:3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:tickClr(),font:{family:'DM Mono',size:11}}}},scales:{x:{grid:{color:gridClr()},ticks:{color:tickClr(),font:{family:'DM Mono',size:11}}},y:{grid:{color:gridClr()},ticks:{color:tickClr(),font:{family:'DM Mono',size:11}}}}}});
-  } else if(mvEl) mvEl.style.display='';
+    movChart=new Chart(mvCanvas,{
+      type:'line',
+      data:{labels,datasets:[
+        {label:'จำนวนขาย (ชิ้น)',data:labels.map(d=>salesByDate[d].qty),borderColor:'#ff5757',backgroundColor:'rgba(255,87,87,0.08)',fill:true,tension:.4,pointRadius:4,yAxisID:'y'},
+        {label:'ยอดขาย (THB)',data:labels.map(d=>salesByDate[d].sales),borderColor:'#c9822d',backgroundColor:'rgba(201,130,45,0.08)',fill:true,tension:.4,pointRadius:4,yAxisID:'y1'}
+      ]},
+      options:{responsive:true,maintainAspectRatio:false,
+        plugins:{legend:{labels:{color:tickClr(),font:{family:'DM Mono',size:11}}}},
+        scales:{
+          x:{grid:{color:gridClr()},ticks:{color:tickClr(),font:{family:'DM Mono',size:11}}},
+          y:{grid:{color:gridClr()},ticks:{color:tickClr(),font:{family:'DM Mono',size:11}},position:'left',title:{display:true,text:'ชิ้น',color:tickClr()}},
+          y1:{grid:{display:false},ticks:{color:tickClr(),font:{family:'DM Mono',size:11},callback:v=>fmtK(v)},position:'right',title:{display:true,text:'THB',color:tickClr()}}
+        }
+      }
+    });
+  } else {
+    // Fallback: ใช้ stockLog ถ้าไม่มียอดขาย
+    const mvLogs=stockLog.filter(l=>l.type==='in'||l.type==='out');
+    if(mvLogs.length>0 && mvCanvas){
+      if(mvEl) mvEl.style.display='none';
+      const days={};
+      mvLogs.forEach(l=>{const d=l.ts?l.ts.split(' ')[0]:'?';if(!days[d])days[d]={in:0,out:0};if(l.type==='in')days[d].in+=l.qty;else days[d].out+=l.qty;});
+      const labels=Object.keys(days).slice(0,14);
+      if(movChart) movChart.destroy();
+      movChart=new Chart(mvCanvas,{type:'line',data:{labels,datasets:[{label:'รับเข้า',data:labels.map(d=>days[d].in),borderColor:'#00e5a0',backgroundColor:'rgba(0,229,160,0.1)',fill:true,tension:.4,pointRadius:3},{label:'จ่ายออก',data:labels.map(d=>days[d].out),borderColor:'#ff5757',backgroundColor:'rgba(255,87,87,0.08)',fill:true,tension:.4,pointRadius:3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:tickClr(),font:{family:'DM Mono',size:11}}}},scales:{x:{grid:{color:gridClr()},ticks:{color:tickClr(),font:{family:'DM Mono',size:11}}},y:{grid:{color:gridClr()},ticks:{color:tickClr(),font:{family:'DM Mono',size:11}}}}}});
+    } else if(mvEl) mvEl.style.display='';
+  }
 }
 
 // ── SALES ─────────────────────────────────────────────────────────────────────
